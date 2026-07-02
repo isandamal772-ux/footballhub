@@ -48,6 +48,8 @@ model Player {
   redCards      Int      @default(0)
   rating        Float    @default(6.0)
   transferValue String   @default("€0")
+  age           Int      @default(25)
+  currentClub   String   @default("Unknown Club")
   imageUrl      String?
   careerHistory String   @default("[]") // JSON string of career clubs
   createdAt     DateTime @default(now())

@@ -202,11 +202,41 @@ const superstarPlayers = [
 ];
 
 const generateAllPlayers = () => {
-  const list = superstarPlayers.map(p => ({
-    ...p,
-    createdAt: new Date(),
-    updatedAt: new Date()
-  }));
+  const list = superstarPlayers.map(p => {
+    let age = 27; // default average age
+    let currentClub = "Free Agent";
+    
+    // Real values for top players
+    if (p.name === "Lionel Messi") { age = 38; currentClub = "Inter Miami"; }
+    else if (p.name === "Cristiano Ronaldo") { age = 41; currentClub = "Al Nassr"; }
+    else if (p.name === "Kylian Mbappé") { age = 27; currentClub = "Real Madrid"; }
+    else if (p.name === "Erling Haaland") { age = 25; currentClub = "Manchester City"; }
+    else if (p.name === "Jude Bellingham") { age = 22; currentClub = "Real Madrid"; }
+    else if (p.name === "Lamine Yamal") { age = 18; currentClub = "Barcelona"; }
+    else if (p.name === "Rodri") { age = 29; currentClub = "Manchester City"; }
+    else if (p.name === "Harry Kane") { age = 32; currentClub = "Bayern Munich"; }
+    else if (p.name === "Vinícius Júnior") { age = 25; currentClub = "Real Madrid"; }
+    else if (p.name === "Florian Wirtz") { age = 22; currentClub = "Bayer Leverkusen"; }
+    else if (p.name === "Jamal Musiala") { age = 22; currentClub = "Bayern Munich"; }
+    else if (p.name === "Achraf Hakimi") { age = 27; currentClub = "PSG"; }
+    else {
+      try {
+        const history = JSON.parse(p.careerHistory);
+        if (history && history.length > 0) {
+          currentClub = history[history.length - 1]?.club || history[0]?.club || "Unknown Club";
+        }
+      } catch (e) {}
+      age = Math.floor(Math.random() * 13) + 21; // 21 to 33
+    }
+
+    return {
+      ...p,
+      age,
+      currentClub,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+  });
 
   const superstarTeamIds = new Set(superstarPlayers.map(p => p.teamId));
 
@@ -227,8 +257,10 @@ const generateAllPlayers = () => {
           appearances: Math.floor(Math.random() * 6) + 4,
           rating: Number((7.0 + Math.random() * 1.5).toFixed(1)),
           transferValue: `€${Math.floor(15 + Math.random() * 50)}M`,
+          age: Math.floor(Math.random() * 12) + 20, // 20 to 31
+          currentClub: `${t.name} FC`,
           imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=150&fit=crop",
-          careerHistory: JSON.stringify([{ club: "Local Club", years: "2021-2024" }]),
+          careerHistory: JSON.stringify([{ club: `${t.name} FC`, years: "2021-Present" }]),
           createdAt: new Date(),
           updatedAt: new Date()
         });

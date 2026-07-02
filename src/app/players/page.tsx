@@ -85,6 +85,8 @@ export default function PlayersDirectory() {
                   <tr className="text-slate-500 border-b border-slate-900 bg-slate-950/30 font-bold uppercase tracking-wider">
                     <th className="py-4 px-6">Player</th>
                     <th>Team</th>
+                    <th className="hidden md:table-cell text-left">Current Club</th>
+                    <th className="hidden sm:table-cell text-left">Age</th>
                     <th>Position</th>
                     <th className="text-center">Apps</th>
                     <th className="text-center font-bold text-brand-green">Goals</th>
@@ -115,6 +117,8 @@ export default function PlayersDirectory() {
                             {p.team?.name}
                           </Link>
                         </td>
+                        <td className="text-slate-400 font-medium hidden md:table-cell">{p.currentClub}</td>
+                        <td className="text-slate-400 font-medium hidden sm:table-cell">{p.age} Yrs</td>
                         <td className="text-slate-400 font-medium">{p.position}</td>
                         <td className="text-center font-mono text-slate-300">{p.appearances}</td>
                         <td className="text-center font-mono font-bold text-brand-green">{p.goals}</td>

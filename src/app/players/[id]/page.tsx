@@ -120,9 +120,13 @@ export default function PlayerDetail() {
                 </Link>
               </div>
               <h1 className="text-2xl md:text-3xl font-black text-white">{player.name}</h1>
-              <p className="text-xs text-slate-400 flex items-center justify-center md:justify-start gap-1">
-                🏟️ Matches: <span className="text-slate-200 font-semibold">{player.appearances} Caps</span>
-              </p>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs text-slate-400 items-center justify-center md:justify-start">
+                <span className="flex items-center gap-1">🎂 Age: <strong className="text-slate-200 font-semibold">{player.age} Years</strong></span>
+                <span className="hidden sm:inline text-slate-800">|</span>
+                <span className="flex items-center gap-1">🏢 Current Club: <strong className="text-slate-200 font-semibold">{player.currentClub}</strong></span>
+                <span className="hidden sm:inline text-slate-800">|</span>
+                <span className="flex items-center gap-1">🏟️ Caps: <strong className="text-slate-200 font-semibold">{player.appearances}</strong></span>
+              </div>
             </div>
           </div>
 
