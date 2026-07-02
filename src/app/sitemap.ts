@@ -12,12 +12,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/players',
     '/compare',
     '/favorites',
-    '/admin'
+    '/admin',
+    '/about',
+    '/contact',
+    '/privacy-policy',
+    '/terms-of-service'
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
-    priority: route === '' ? 1.0 : 0.8,
+    priority: route === '' ? 1.0 : (['/about', '/contact', '/privacy-policy', '/terms-of-service'].includes(route) ? 0.4 : 0.8),
   }));
 
   // Fetch dynamic items
