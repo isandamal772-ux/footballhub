@@ -343,6 +343,34 @@ export default function ComparisonEngine() {
                         );
                       })()}
                     </div>
+
+                    {/* Age */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-slate-300 font-mono">
+                        <span>{playerA.age} Years</span>
+                        <span className="font-normal text-[10px] text-slate-400 uppercase tracking-widest font-sans">Age</span>
+                        <span>{playerB.age} Years</span>
+                      </div>
+                      {(() => {
+                        const { pctA } = calculateBarPercentages(playerA.age, playerB.age);
+                        return (
+                          <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden flex">
+                            <div className="bg-brand-green h-full" style={{ width: `${pctA}%` }}></div>
+                            <div className="bg-slate-700 h-full grow"></div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Current Club */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs font-bold text-slate-300">
+                        <span className="text-left w-1/3 truncate">{playerA.currentClub}</span>
+                        <span className="font-normal text-[10px] text-slate-400 uppercase tracking-widest text-center w-1/3">Current Club</span>
+                        <span className="text-right w-1/3 truncate">{playerB.currentClub}</span>
+                      </div>
+                      <div className="w-full border-t border-slate-900"></div>
+                    </div>
                   </div>
                 </div>
               ) : (
