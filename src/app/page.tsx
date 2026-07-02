@@ -47,7 +47,7 @@ export default function Home() {
 
   useEffect(() => {
     loadData();
-    // Poll matches every 10 seconds for live updates
+    // Poll matches every 5 seconds for live updates
     const interval = setInterval(async () => {
       try {
         const matchesRes = await fetch('/api/matches');
@@ -56,7 +56,7 @@ export default function Home() {
       } catch (e) {
         console.error(e);
       }
-    }, 10000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);

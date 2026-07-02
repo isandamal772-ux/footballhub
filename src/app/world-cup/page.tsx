@@ -29,6 +29,8 @@ export default function WorldCupSection() {
       }
     }
     loadData();
+    const interval = setInterval(loadData, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   // Sort groups A-D
