@@ -133,9 +133,10 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-2">
           <span>&copy; {new Date().getFullYear()} World Football Hub. All rights reserved. Built for mobile-first sports coverage.</span>
           <div className="flex space-x-4">
-            <a href="#" className="hover:text-slate-400">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-400">Terms of Use</a>
-            <a href="#" className="hover:text-slate-400">Sitemap</a>
+            <Link href="/about" className="hover:text-slate-400">About Us</Link>
+            <Link href="/contact" className="hover:text-slate-400">Contact Us</Link>
+            <Link href="/privacy-policy" className="hover:text-slate-400">Privacy Policy</Link>
+            <Link href="/terms-of-service" className="hover:text-slate-400">Terms of Use</Link>
           </div>
         </div>
       </div>
