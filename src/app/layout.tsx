@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "YOUR_GOOGLE_SITE_VERIFICATION_CODE",
+    google: "1DmffLjbCGfwEhFxowENOB3DBPya_izMbJgni4xMr-A",
   },
 };
 
