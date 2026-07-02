@@ -1,0 +1,109 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String
+  role         String       @default("FAN") // "ADMIN", "FAN"
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  predictions  Prediction[]
+  favorites    Favorite[]
+}
+
+model Team {
+  id             String    @id @default(uuid())
+  name           String    @unique
+  code           String    @unique // e.g. ARG, FRA, BRA
+  flagUrl        String
+  groupName      String    // e.g. "Group A"
+  ranking        Int       // FIFA Ranking
+  form           String    // e.g. "W,D,W,W,L"
+  coachName      String
+  matchesAsTeamA Match[]   @relation("TeamA")
+  matchesAsTeamB Match[]   @relation("TeamB")
+  players        Player[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Player {
+  id            String   @id @default(uuid())
+  name          String
+  position      String   // e.g. "Forward", "Midfielder", "Defender", "Goalkeeper"
+  jerseyNumber  Int
+  teamId        String
+  team          Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  goals         Int      @default(0)
+  assists       Int      @default(0)
+  appearances   Int      @default(0)
+  yellowCards   Int      @default(0)
+  redCards      Int      @default(0)
+  rating        Float    @default(6.0)
+  transferValue String   @default("€0")
+  imageUrl      String?
+  careerHistory String   @default("[]") // JSON string of career clubs
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Match {
+  id          String       @id @default(uuid())
+  teamAId     String
+  teamBId     String
+  teamA       Team         @relation("TeamA", fields: [teamAId], references: [id], onDelete: Cascade)
+  teamB       Team         @relation("TeamB", fields: [teamBId], references: [id], onDelete: Cascade)
+  teamAScore  Int          @default(0)
+  teamBScore  Int          @default(0)
+  status      String       @default("SCHEDULED") // "SCHEDULED", "LIVE", "HT", "FT"
+  timeElapsed Int          @default(0) // minutes
+  datetime    DateTime
+  venue       String
+  stage       String       // "Group Stage", "Round of 16", "Quarter-Final", "Semi-Final", "Final"
+  groupName   String?      // e.g. "Group A"
+  stats       String       @default("{}") // JSON string of match stats (possession, shots, cards)
+  events      String       @default("[]") // JSON string of match timeline events
+  commentary  String       @default("[]") // JSON string of live text commentary feed
+  predictions Prediction[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model News {
+  id        String   @id @default(uuid())
+  title     String
+  slug      String   @unique
+  summary   String
+  content   String
+  imageUrl  String
+  trending  Boolean  @default(false)
+  tags      String   @default("") // comma separated values
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Prediction {
+  id         String   @id @default(uuid())
+  matchId    String
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  prediction String   // "TEAM_A", "DRAW", "TEAM_B"
+  createdAt  DateTime @default(now())
+}
+
+model Favorite {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "TEAM", "PLAYER", "MATCH"
+  targetId  String
+  createdAt DateTime @default(now())
+}
