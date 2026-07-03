@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Heart, MapPin, Calendar, Play, ChevronRight } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
+import CountdownTimer from './CountdownTimer';
 
 interface MatchCardProps {
   match: {
@@ -79,11 +80,9 @@ export default function MatchCard({ match }: MatchCardProps) {
           {/* Central Score / Time */}
           <div className="flex flex-col items-center justify-center grow">
             {match.status === 'SCHEDULED' ? (
-              <div className="text-center">
-                <span className="text-xs font-bold text-emerald-400 border border-brand-green/20 px-2 py-0.5 rounded-md bg-brand-green/5">
-                  Upcoming
-                </span>
-                <span className="block text-[11px] text-slate-400 mt-2 font-mono">{formattedDate}</span>
+              <div className="text-center flex flex-col items-center gap-1.5">
+                <span className="block text-[11px] text-slate-400 font-mono">{formattedDate}</span>
+                <CountdownTimer targetDate={match.datetime} />
               </div>
             ) : (
               <div className="text-center">

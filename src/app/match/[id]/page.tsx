@@ -7,6 +7,7 @@ import { Shield, Clock, MapPin, Award, Users, ChevronLeft, Heart, MessageSquare,
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useApp } from '@/context/AppContext';
+import CountdownTimer from '@/components/CountdownTimer';
 
 export default function MatchCenter() {
   const params = useParams();
@@ -174,7 +175,10 @@ export default function MatchCenter() {
                 ) : match.status === 'FT' ? (
                   <span className="text-xs bg-slate-900 text-slate-500 font-bold px-3 py-1 rounded-full mt-3">Full Time</span>
                 ) : (
-                  <span className="text-xs bg-slate-900 text-slate-400 font-bold px-3 py-1 rounded-full mt-3">Scheduled</span>
+                  <div className="mt-3 flex flex-col items-center gap-1.5">
+                    <span className="text-xs bg-slate-900 text-slate-400 font-bold px-3 py-1 rounded-full">Scheduled</span>
+                    <CountdownTimer targetDate={match.datetime} />
+                  </div>
                 )}
               </div>
 
