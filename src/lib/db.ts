@@ -715,7 +715,7 @@ export const dbMock = {
   },
   match: {
     findMany: async (args?: any) => {
-      const apiKey = process.env.FOOTBALL_API_KEY;
+      const apiKey = process.env.FOOTBALL_API_KEY || "7e46bf08406447bfa63704fbbc86acd5";
       if (apiKey) {
         try {
           const res = await fetch("https://api.football-data.org/v4/matches", {
@@ -794,7 +794,7 @@ export const dbMock = {
       return results;
     },
     findUnique: async ({ where, include }: { where: { id: string }; include?: any }) => {
-      const apiKey = process.env.FOOTBALL_API_KEY;
+      const apiKey = process.env.FOOTBALL_API_KEY || "7e46bf08406447bfa63704fbbc86acd5";
       if (apiKey && where.id.startsWith("api-match-")) {
         const matchId = where.id.replace("api-match-", "");
         try {
