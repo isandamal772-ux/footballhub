@@ -447,185 +447,157 @@ const mockStore: MockDataStore = {
 };
 
 // Auto-updating live match simulation loop state
+const getLiveMatchState = () => {
+  const now = Date.now();
+  const blockMs = 90 * 60 * 1000;
+  const currentBlock = Math.floor(now / blockMs);
+  const timeElapsed = Math.floor((now % blockMs) / (60 * 1000));
+
+  const totalTeams = mockStore.teams.length || 1;
+  const idxA = (currentBlock * 3) % totalTeams;
+  let idxB = (currentBlock * 3 + 1) % totalTeams;
+  if (idxA === idxB) idxB = (idxB + 1) % totalTeams;
+
+  const tA = mockStore.teams[idxA];
+  const tB = mockStore.teams[idxB];
+
+  // Get superstar or seeded players of team A and team B for event assignments
+  const playersA = mockStore.players.filter(p => p.teamId === tA.id);
+  const playersB = mockStore.players.filter(p => p.teamId === tB.id);
+
+  // Deterministic event minutes
+  const eventTimes = [12, 28, 45, 62, 78, 88];
+  const events: any[] = [];
+  const commentary: any[] = [];
+  let scoreA = 0;
+  let scoreB = 0;
+
+  commentary.push({
+    time: 0,
+    text: `Kickoff! The match between ${tA.name} and ${tB.name} has officially begun at Lusail Stadium.`
+  });
+
+  // Seeded deterministic random number generator
+  const seed = currentBlock;
+  const isGoal = (minute: number) => {
+    const r = Math.sin(seed + minute) * 10000;
+    return (r - Math.floor(r)) < 0.28; // 28% chance of goal
+  };
+  const isCard = (minute: number) => {
+    const r = Math.sin(seed + minute + 3) * 10000;
+    return (r - Math.floor(r)) < 0.22; // 22% chance of card
+  };
+
+  eventTimes.forEach(minute => {
+    if (minute <= timeElapsed) {
+      if (isGoal(minute)) {
+        const teamAScores = (Math.sin(seed + minute + 5) * 10000 % 2) > 0;
+        if (teamAScores) {
+          scoreA++;
+          const scorer = playersA[minute % (playersA.length || 1)]?.name || "Striker";
+          events.push({
+            time: minute,
+            type: "GOAL",
+            team: tA.code,
+            player: scorer,
+            detail: "Superb clinical finish past the diving keeper."
+          });
+          commentary.unshift({
+            time: minute,
+            text: `GOAL! ${scorer} scores for ${tA.name}! The crowd goes wild.`
+          });
+        } else {
+          scoreB++;
+          const scorer = playersB[minute % (playersB.length || 1)]?.name || "Forward";
+          events.push({
+            time: minute,
+            type: "GOAL",
+            team: tB.code,
+            player: scorer,
+            detail: "Powerful header direct from a corner kick."
+          });
+          commentary.unshift({
+            time: minute,
+            text: `GOAL! ${scorer} scores for ${tB.name}! A beautiful tactical setup.`
+          });
+        }
+      } else if (isCard(minute)) {
+        const teamACard = (Math.sin(seed + minute + 8) * 10000 % 2) > 0;
+        const culprit = teamACard 
+          ? (playersA[(minute + 2) % (playersA.length || 1)]?.name || "Defender")
+          : (playersB[(minute + 2) % (playersB.length || 1)]?.name || "Midfielder");
+        
+        events.push({
+          time: minute,
+          type: "CARD",
+          team: teamACard ? tA.code : tB.code,
+          player: culprit,
+          detail: "Yellow card for a sliding tackle."
+        });
+        commentary.unshift({
+          time: minute,
+          text: `YELLOW CARD! Caution shown to ${culprit} for an intentional trip.`
+        });
+      }
+    }
+  });
+
+  return {
+    id: `match-live-${currentBlock}`,
+    teamAId: tA.id,
+    teamBId: tB.id,
+    teamAScore: scoreA,
+    teamBScore: scoreB,
+    status: timeElapsed >= 90 ? "FT" : "LIVE",
+    timeElapsed: Math.min(timeElapsed, 90),
+    datetime: new Date(now - (timeElapsed * 60 * 1000)),
+    venue: "Lusail Stadium, Lusail",
+    stage: "Group Stage",
+    groupName: tA.groupName || "Group A",
+    stats: JSON.stringify({
+      possession: { teamA: 50 + Math.floor(Math.sin(seed) * 8), teamB: 50 - Math.floor(Math.sin(seed) * 8) },
+      shots: { teamA: 5 + Math.floor(timeElapsed / 10), teamB: 4 + Math.floor(timeElapsed / 12) },
+      shotsOnTarget: { teamA: 2 + Math.floor(timeElapsed / 20), teamB: 2 + Math.floor(timeElapsed / 22) },
+      fouls: { teamA: 4 + Math.floor(timeElapsed / 15), teamB: 5 + Math.floor(timeElapsed / 14) },
+      yellowCards: { teamA: 1, teamB: 1 },
+      redCards: { teamA: 0, teamB: 0 },
+      corners: { teamA: 2 + Math.floor(timeElapsed / 25), teamB: 2 + Math.floor(timeElapsed / 28) }
+    }),
+    events: JSON.stringify(events),
+    commentary: JSON.stringify(commentary),
+    createdAt: new Date(),
+    updatedAt: new Date()
+  };
+};
+
 let lastSimulationTime = Date.now();
 
 function simulateLiveMatches() {
-  const now = Date.now();
-  const secondsElapsed = (now - lastSimulationTime) / 1000;
-  if (secondsElapsed < 4) {
-    // Only update at most once every 4 seconds to prevent excessive processing
-    return;
-  }
-  lastSimulationTime = now;
+  const liveState = getLiveMatchState();
+  const existingLiveIndex = mockStore.matches.findIndex(m => m.id.startsWith("match-live-") || m.id === "match-1");
 
-  // 1. Find live match
-  let liveMatch = mockStore.matches.find(m => m.status === "LIVE");
-
-  // 2. If no live match exists, start a new one between 2 random teams!
-  if (!liveMatch) {
-    const teams = mockStore.teams;
-    if (teams.length >= 2) {
-      const idxA = Math.floor(Math.random() * teams.length);
-      let idxB = Math.floor(Math.random() * teams.length);
-      while (idxB === idxA) {
-        idxB = Math.floor(Math.random() * teams.length);
-      }
-      const teamA = teams[idxA];
-      const teamB = teams[idxB];
-
-      const newLiveMatch = {
-        id: `match-live-${Math.floor(Math.random() * 10000)}`,
-        teamAId: teamA.id,
-        teamBId: teamB.id,
-        teamAScore: 0,
-        teamBScore: 0,
-        status: "LIVE",
-        timeElapsed: 0,
-        datetime: new Date(),
-        venue: "Lusail Stadium, Lusail",
-        stage: "Group Stage",
-        groupName: "Group A",
-        stats: JSON.stringify({
-          possession: { teamA: 50, teamB: 50 },
-          shots: { teamA: 0, teamB: 0 },
-          shotsOnTarget: { teamA: 0, teamB: 0 },
-          fouls: { teamA: 0, teamB: 0 },
-          yellowCards: { teamA: 0, teamB: 0 },
-          redCards: { teamA: 0, teamB: 0 },
-          corners: { teamA: 0, teamB: 0 }
-        }),
-        events: JSON.stringify([]),
-        commentary: JSON.stringify([
-          { time: 0, text: `Kickoff! The match between ${teamA.name} and ${teamB.name} has begun.` }
-        ]),
-        createdAt: new Date(),
+  if (existingLiveIndex !== -1) {
+    const oldMatch = mockStore.matches[existingLiveIndex];
+    if (oldMatch.id !== liveState.id) {
+      // Set the previous live match to FT
+      oldMatch.status = "FT";
+      oldMatch.timeElapsed = 90;
+      mockStore.matches.unshift(liveState);
+    } else {
+      mockStore.matches[existingLiveIndex] = {
+        ...oldMatch,
+        timeElapsed: liveState.timeElapsed,
+        teamAScore: liveState.teamAScore,
+        teamBScore: liveState.teamBScore,
+        stats: liveState.stats,
+        events: liveState.events,
+        commentary: liveState.commentary,
+        status: liveState.status,
         updatedAt: new Date()
       };
-
-      // Set other previous LIVE matches to finished (FT) to avoid conflict
-      mockStore.matches = mockStore.matches.map(m => m.status === "LIVE" ? { ...m, status: "FT" } : m);
-      mockStore.matches.unshift(newLiveMatch);
-      liveMatch = newLiveMatch;
     }
-  }
-
-  if (liveMatch) {
-    // Progress match timer (simulated: +1 min every 6 seconds of real-world time)
-    const minutesToIncrement = Math.floor(secondsElapsed / 6);
-    if (minutesToIncrement > 0) {
-      liveMatch.timeElapsed = Math.min(liveMatch.timeElapsed + minutesToIncrement, 90);
-      liveMatch.updatedAt = new Date();
-
-      // Update match statistics randomly
-      try {
-        const stats = JSON.parse(liveMatch.stats);
-        stats.possession.teamA = Math.floor(40 + Math.random() * 20);
-        stats.possession.teamB = 100 - stats.possession.teamA;
-        if (Math.random() > 0.4) stats.shots.teamA += 1;
-        if (Math.random() > 0.4) stats.shots.teamB += 1;
-        if (Math.random() > 0.6) stats.shotsOnTarget.teamA += 1;
-        if (Math.random() > 0.6) stats.shotsOnTarget.teamB += 1;
-        if (Math.random() > 0.7) stats.fouls.teamA += 1;
-        if (Math.random() > 0.7) stats.fouls.teamB += 1;
-        if (Math.random() > 0.8) stats.corners.teamA += 1;
-        if (Math.random() > 0.8) stats.corners.teamB += 1;
-        liveMatch.stats = JSON.stringify(stats);
-      } catch (e) {}
-
-      // Major match events parsing
-      let events = [];
-      let commentary = [];
-      try { events = JSON.parse(liveMatch.events); } catch (e) {}
-      try { commentary = JSON.parse(liveMatch.commentary); } catch (e) {}
-      
-      const tA = mockStore.teams.find(t => t.id === liveMatch.teamAId);
-      const tB = mockStore.teams.find(t => t.id === liveMatch.teamBId);
-      const teamACode = tA ? tA.code : "TMA";
-      const teamBCode = tB ? tB.code : "TMB";
-
-      // 4% chance team A scores
-      if (Math.random() < 0.04 && liveMatch.timeElapsed < 90) {
-        liveMatch.teamAScore += 1;
-        const scorer = mockStore.players.filter(p => p.teamId === liveMatch.teamAId)[Math.floor(Math.random() * 6)]?.name || "Player A";
-        events.push({
-          time: liveMatch.timeElapsed,
-          type: "GOAL",
-          team: teamACode,
-          player: scorer,
-          detail: "Powerful strike beating the keeper."
-        });
-        commentary.unshift({
-          time: liveMatch.timeElapsed,
-          text: `GOAL! ${scorer} scores for ${tA?.name || "Team A"}! Absolutely fantastic finishing.`
-        });
-      }
-
-      // 4% chance team B scores
-      if (Math.random() < 0.04 && liveMatch.timeElapsed < 90) {
-        liveMatch.teamBScore += 1;
-        const scorer = mockStore.players.filter(p => p.teamId === liveMatch.teamBId)[Math.floor(Math.random() * 6)]?.name || "Player B";
-        events.push({
-          time: liveMatch.timeElapsed,
-          type: "GOAL",
-          team: teamBCode,
-          player: scorer,
-          detail: "Splendid finish into the bottom corner."
-        });
-        commentary.unshift({
-          time: liveMatch.timeElapsed,
-          text: `GOAL! ${scorer} scores for ${tB?.name || "Team B"}! The stadium is erupting.`
-        });
-      }
-
-      // 6% chance for a Booking
-      if (Math.random() < 0.06 && liveMatch.timeElapsed < 90) {
-        const isTeamA = Math.random() > 0.5;
-        const cardTeam = isTeamA ? teamACode : teamBCode;
-        const cardTeamName = isTeamA ? (tA?.name || "Team A") : (tB?.name || "Team B");
-        const playerList = mockStore.players.filter(p => p.teamId === (isTeamA ? liveMatch.teamAId : liveMatch.teamBId));
-        const culprit = playerList[Math.floor(Math.random() * playerList.length)]?.name || "Player";
-        events.push({
-          time: liveMatch.timeElapsed,
-          type: "CARD",
-          team: cardTeam,
-          player: culprit,
-          detail: "Yellow card for a tactical challenge."
-        });
-        commentary.unshift({
-          time: liveMatch.timeElapsed,
-          text: `YELLOW CARD! Caution shown to ${culprit} (${cardTeamName}) for an intentional foul.`
-        });
-      }
-
-      // 30% chance for a running commentary text
-      if (Math.random() < 0.3) {
-        const actionTexts = [
-          "End to end stuff! Both teams seeking an opening goal.",
-          "Tactical play in progress. Midfields are fighting hard for possession.",
-          "Close call! The ball goes slightly wide of the left post.",
-          "Goalkeeper performs a wonderful leaping save from a freekick.",
-          "Substitutes warming up as we head deeper into the match.",
-          "A corner kick is cleared away with authority by the defenders."
-        ];
-        commentary.unshift({
-          time: liveMatch.timeElapsed,
-          text: actionTexts[Math.floor(Math.random() * actionTexts.length)]
-        });
-      }
-
-      liveMatch.events = JSON.stringify(events);
-      liveMatch.commentary = JSON.stringify(commentary);
-
-      // If match ends (reaches 90)
-      if (liveMatch.timeElapsed >= 90) {
-        liveMatch.status = "FT";
-        commentary.unshift({
-          time: 90,
-          text: "Full Time! The referee blows the whistle. Match ends."
-        });
-        liveMatch.commentary = JSON.stringify(commentary);
-      }
-    }
+  } else {
+    mockStore.matches.unshift(liveState);
   }
 }
 
