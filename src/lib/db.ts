@@ -368,6 +368,43 @@ const mockStore: MockDataStore = {
       updatedAt: new Date()
     },
     {
+      id: "match-por-hr",
+      teamAId: "team-por",
+      teamBId: "team-hr",
+      teamAScore: 2,
+      teamBScore: 1,
+      status: "FT",
+      timeElapsed: 90,
+      datetime: new Date(Date.now() - 86400000), // Yesterday
+      venue: "Estádio da Luz, Lisbon",
+      stage: "Group Stage",
+      groupName: "Group B",
+      stats: JSON.stringify({
+        possession: { teamA: 55, teamB: 45 },
+        shots: { teamA: 14, teamB: 10 },
+        shotsOnTarget: { teamA: 7, teamB: 4 },
+        fouls: { teamA: 10, teamB: 12 },
+        yellowCards: { teamA: 1, teamB: 2 },
+        redCards: { teamA: 0, teamB: 0 },
+        corners: { teamA: 6, teamB: 4 }
+      }),
+      events: JSON.stringify([
+        { time: 7, type: "GOAL", team: "POR", player: "Cristiano Ronaldo", detail: "Incredible header from a Bruno Fernandes cross." },
+        { time: 34, type: "GOAL", team: "POR", player: "Rafael Leão", detail: "Sensational solo run and finish into the bottom corner." },
+        { time: 41, type: "CARD", team: "CRO", player: "Luka Modrić", detail: "Yellow card for stopping a promising counter attack." },
+        { time: 72, type: "GOAL", team: "CRO", player: "Andrej Kramarić", detail: "Tap-in after a defensive rebound." }
+      ]),
+      commentary: JSON.stringify([
+        { time: 90, text: "Full Time! Portugal wins 2-1 against Croatia in a thrilling encounter." },
+        { time: 72, text: "GOAL! Kramarić scores for Croatia! Game on in Lisbon." },
+        { time: 45, text: "Half Time: Portugal leads 2-0 after dominant play by Ronaldo and Leão." },
+        { time: 34, text: "GOAL! Rafael Leão makes it 2-0! A sensational solo run." },
+        { time: 7, text: "GOAL! Cristiano Ronaldo scores the opener! Estádio da Luz is rocking!" }
+      ]),
+      createdAt: new Date(Date.now() - 86400000),
+      updatedAt: new Date(Date.now() - 86400000)
+    },
+    {
       id: "match-3",
       teamAId: "team-eng",
       teamBId: "team-bra",
