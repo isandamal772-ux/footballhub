@@ -23,6 +23,8 @@ export default function ContactUs() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>Contact Us | World Football Hub</title>
+      <meta name="description" content="Reach out to the World Football Hub team for support, general feedback, and advertising inquiries." />
       <Header />
       <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-12 sm:px-6 lg:px-8 space-y-8">
         

@@ -35,6 +35,8 @@ export default function TeamsDirectory() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>National Football Teams Directory | World Football Hub</title>
+      <meta name="description" content="Explore details, rankings, coach information, and squads for FIFA national football teams at World Football Hub." />
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">

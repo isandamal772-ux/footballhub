@@ -62,6 +62,8 @@ export default function ComparisonEngine() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>Squad & Player Comparison Engine | World Football Hub</title>
+      <meta name="description" content="Compare national teams and soccer players side-by-side on goals, assists, rankings, and stats with our head-to-head comparison tool." />
       <Header />
 
       <main className="flex-grow max-w-5xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">

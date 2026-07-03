@@ -37,6 +37,8 @@ export default function PlayersDirectory() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>World Football Player Directory | World Football Hub</title>
+      <meta name="description" content="Browse profiles, market valuations, stats, and rankings for the world's top professional football players at World Football Hub." />
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">

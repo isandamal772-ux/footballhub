@@ -47,6 +47,8 @@ export default function FavoritesDashboard() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>Your Favorite Squads, Players & Matches | World Football Hub</title>
+      <meta name="description" content="View and manage your bookmarked players, favorite national teams, and bookmarked match schedules in one place." />
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
