@@ -16,6 +16,8 @@ export default function MatchCenter() {
   const id = params?.id as string;
 
   const [match, setMatch] = useState<any>(null);
+  const [nextMatchA, setNextMatchA] = useState<any>(null);
+  const [nextMatchB, setNextMatchB] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'STREAM' | 'STATS' | 'LINEUPS' | 'PREDICTIONS'>('OVERVIEW');
   const [predictionSubmitted, setPredictionSubmitted] = useState(false);
   const [predictionChoice, setPredictionChoice] = useState<string | null>(null);
@@ -26,12 +28,28 @@ export default function MatchCenter() {
 
   async function loadMatchDetail() {
     try {
-      const res = await fetch(`/api/matches/${id}`);
-      if (!res.ok) {
+      const [detailRes, listRes] = await Promise.all([
+        fetch(`/api/matches/${id}`),
+        fetch('/api/matches')
+      ]);
+      if (!detailRes.ok) {
         throw new Error("Match not found");
       }
-      const data = await res.json();
+      const data = await detailRes.json();
       setMatch(data);
+
+      const allMatches = await listRes.json();
+      if (Array.isArray(allMatches)) {
+        const nextA = allMatches
+          .filter(m => m.id !== id && m.status === 'SCHEDULED' && (m.teamAId === data.teamAId || m.teamBId === data.teamAId))
+          .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())[0];
+        setNextMatchA(nextA);
+
+        const nextB = allMatches
+          .filter(m => m.id !== id && m.status === 'SCHEDULED' && (m.teamAId === data.teamBId || m.teamBId === data.teamBId))
+          .sort((a, b) => new Date(a.datetime).getTime() - new Date(b.datetime).getTime())[0];
+        setNextMatchB(nextB);
+      }
     } catch (e) {
       console.error(e);
       router.push('/');
@@ -153,6 +171,23 @@ export default function MatchCenter() {
                   {match.teamA?.name}
                 </h2>
                 <span className="text-[10px] text-slate-500 font-mono mt-0.5">Rank #{match.teamA?.ranking}</span>
+
+                {/* Team A Goalscorers */}
+                {(() => {
+                  try {
+                    const goals = JSON.parse(match.events || "[]").filter((e: any) => e.type === "GOAL" && e.team === match.teamA?.code);
+                    if (goals.length > 0) {
+                      return (
+                        <div className="text-[9px] text-slate-400 mt-2 space-y-0.5 max-w-full text-center font-medium bg-slate-900/20 px-2 py-1 rounded border border-slate-900/30">
+                          {goals.map((g: any, idx: number) => (
+                            <div key={idx} className="truncate">⚽ {g.player} ({g.time}')</div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  } catch (e) {}
+                  return null;
+                })()}
               </div>
 
               {/* Central Dashboard Score */}
@@ -193,6 +228,23 @@ export default function MatchCenter() {
                   {match.teamB?.name}
                 </h2>
                 <span className="text-[10px] text-slate-500 font-mono mt-0.5">Rank #{match.teamB?.ranking}</span>
+
+                {/* Team B Goalscorers */}
+                {(() => {
+                  try {
+                    const goals = JSON.parse(match.events || "[]").filter((e: any) => e.type === "GOAL" && e.team === match.teamB?.code);
+                    if (goals.length > 0) {
+                      return (
+                        <div className="text-[9px] text-slate-400 mt-2 space-y-0.5 max-w-full text-center font-medium bg-slate-900/20 px-2 py-1 rounded border border-slate-900/30">
+                          {goals.map((g: any, idx: number) => (
+                            <div key={idx} className="truncate">⚽ {g.player} ({g.time}')</div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  } catch (e) {}
+                  return null;
+                })()}
               </div>
             </div>
 
@@ -285,6 +337,88 @@ export default function MatchCenter() {
                   )}
                 </div>
               </div>
+
+              {/* Upcoming Fixtures Preview */}
+              {(nextMatchA || nextMatchB) && (
+                <div className="md:col-span-12 glass-panel rounded-2xl p-6 space-y-4 mt-6">
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3 flex items-center gap-1.5">
+                    📅 Next Scheduled Match Preview
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Team A Next Match */}
+                    {nextMatchA ? (
+                      <div className="bg-slate-950/40 border border-slate-900/60 p-4 rounded-xl space-y-3">
+                        <span className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">
+                          Next for {match.teamA?.name}
+                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={nextMatchA.teamA?.id === match.teamAId ? nextMatchA.teamB?.flagUrl : nextMatchA.teamA?.flagUrl}
+                              alt=""
+                              className="w-8 h-5.5 object-cover rounded border border-slate-800"
+                            />
+                            <span className="text-xs font-bold text-white">
+                              vs {nextMatchA.teamA?.id === match.teamAId ? nextMatchA.teamB?.name : nextMatchA.teamA?.name}
+                            </span>
+                          </div>
+                          <CountdownTimer targetDate={nextMatchA.datetime} />
+                        </div>
+                        <div className="text-[10px] text-slate-500 flex flex-col gap-1 pt-1.5 border-t border-slate-900/40 font-medium">
+                          <span>🏟️ Venue: {nextMatchA.venue}</span>
+                          <span>📅 Kickoff: {new Date(nextMatchA.datetime).toLocaleString()}</span>
+                        </div>
+                        <Link
+                          href={`/match/${nextMatchA.id}`}
+                          className="block text-center text-[10px] bg-slate-900 hover:bg-slate-800 text-brand-green border border-slate-800 rounded-lg py-2 font-bold transition mt-2"
+                        >
+                          Preview Match Center
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-950/40 border border-slate-900/60 p-4 rounded-xl text-center text-xs text-slate-500 italic flex items-center justify-center font-medium">
+                        No upcoming fixtures scheduled for {match.teamA?.name}.
+                      </div>
+                    )}
+
+                    {/* Team B Next Match */}
+                    {nextMatchB ? (
+                      <div className="bg-slate-950/40 border border-slate-900/60 p-4 rounded-xl space-y-3">
+                        <span className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-wider block">
+                          Next for {match.teamB?.name}
+                        </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <img
+                              src={nextMatchB.teamA?.id === match.teamBId ? nextMatchB.teamB?.flagUrl : nextMatchB.teamA?.flagUrl}
+                              alt=""
+                              className="w-8 h-5.5 object-cover rounded border border-slate-800"
+                            />
+                            <span className="text-xs font-bold text-white">
+                              vs {nextMatchB.teamA?.id === match.teamBId ? nextMatchB.teamB?.name : nextMatchB.teamA?.name}
+                            </span>
+                          </div>
+                          <CountdownTimer targetDate={nextMatchB.datetime} />
+                        </div>
+                        <div className="text-[10px] text-slate-500 flex flex-col gap-1 pt-1.5 border-t border-slate-900/40 font-medium">
+                          <span>🏟️ Venue: {nextMatchB.venue}</span>
+                          <span>📅 Kickoff: {new Date(nextMatchB.datetime).toLocaleString()}</span>
+                        </div>
+                        <Link
+                          href={`/match/${nextMatchB.id}`}
+                          className="block text-center text-[10px] bg-slate-900 hover:bg-slate-800 text-brand-green border border-slate-800 rounded-lg py-2 font-bold transition mt-2"
+                        >
+                          Preview Match Center
+                        </Link>
+                      </div>
+                    ) : (
+                      <div className="bg-slate-950/40 border border-slate-900/60 p-4 rounded-xl text-center text-xs text-slate-500 italic flex items-center justify-center font-medium">
+                        No upcoming fixtures scheduled for {match.teamB?.name}.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
