@@ -176,6 +176,8 @@ export default function MatchCenter() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>{`${match.teamA?.name} vs ${match.teamB?.name} Live Score | World Football Hub`}</title>
+      <meta name="description" content={`Follow the live match score, statistics, commentary timeline and lineups for ${match.teamA?.name} vs ${match.teamB?.name} at World Football Hub.`} />
       <Header />
 
       <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">

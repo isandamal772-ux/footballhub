@@ -77,6 +77,8 @@ export default function TeamDetail() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>{`${team.name} National Team Squad & Standings | World Football Hub`}</title>
+      <meta name="description" content={`Explore fixtures, roster squad list, coach details, FIFA ranking, and match results for ${team.name} national team at World Football Hub.`} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

@@ -76,6 +76,8 @@ export default function NewsArticleDetail() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>{`${article.title} | World Football Hub`}</title>
+      <meta name="description" content={article.summary} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

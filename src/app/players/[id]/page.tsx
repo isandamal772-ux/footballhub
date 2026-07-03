@@ -68,6 +68,8 @@ export default function PlayerDetail() {
 
   return (
     <div className="flex flex-col min-h-screen">
+      <title>{`${player.name} Player Profile & Stats | World Football Hub`}</title>
+      <meta name="description" content={`View player profile, goals, assists, age, club, rating and detailed statistics for ${player.name} at World Football Hub.`} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
