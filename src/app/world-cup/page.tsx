@@ -42,28 +42,28 @@ export default function WorldCupSection() {
       name: "Lusail Iconic Stadium",
       city: "Lusail City",
       capacity: "88,966",
-      imageUrl: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=600&auto=format&fit=crop",
+      imageUrl: "https://images.unsplash.com/photo-1624880351724-413487af687e?q=80&w=600&auto=format&fit=crop",
       matches: "Hosts the Final and 9 matches in total."
     },
     {
       name: "Al Bayt Stadium",
       city: "Al Khor",
       capacity: "68,895",
-      imageUrl: "https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=600&auto=format&fit=crop",
+      imageUrl: "https://images.unsplash.com/photo-1568194157720-0c7df764d3d7?q=80&w=600&auto=format&fit=crop",
       matches: "Hosts the Opening Match and 9 matches in total."
     },
     {
       name: "Education City Stadium",
       city: "Al Rayyan",
       capacity: "44,667",
-      imageUrl: "https://images.unsplash.com/photo-1459865264687-595d652de67e?q=80&w=600&auto=format&fit=crop",
+      imageUrl: "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=600&auto=format&fit=crop",
       matches: "Hosts Group Stage and Quarter-Final matches."
     },
     {
       name: "Ahmad Bin Ali Stadium",
       city: "Al Rayyan",
       capacity: "45,032",
-      imageUrl: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=600&auto=format&fit=crop",
+      imageUrl: "https://images.unsplash.com/photo-1556056504-517cf0154d42?q=80&w=600&auto=format&fit=crop",
       matches: "Hosts 7 matches up to Round of 16."
     }
   ];
