@@ -26,6 +26,54 @@ export default function MatchCenter() {
 
   const isFavorite = favorites.matches.includes(id);
 
+  const [streamUrl, setStreamUrl] = useState<string>("");
+  const [activeServer, setActiveServer] = useState<'PRESET' | 'CUSTOM'>('PRESET');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`match-stream-${id}`);
+      if (saved) {
+        setStreamUrl(saved);
+        setActiveServer('CUSTOM');
+      }
+    }
+  }, [id]);
+
+  const saveStreamUrl = (url: string) => {
+    setStreamUrl(url);
+    if (typeof window !== 'undefined') {
+      if (url) {
+        localStorage.setItem(`match-stream-${id}`, url);
+        setActiveServer('CUSTOM');
+      } else {
+        localStorage.removeItem(`match-stream-${id}`);
+        setActiveServer('PRESET');
+      }
+    }
+  };
+
+  const getEmbedUrl = (url: string) => {
+    try {
+      if (url.includes('youtube.com') || url.includes('youtu.be')) {
+        let videoId = '';
+        if (url.includes('youtube.com/watch')) {
+          const params = new URLSearchParams(new URL(url).search);
+          videoId = params.get('v') || '';
+        } else if (url.includes('youtu.be/')) {
+          videoId = url.split('youtu.be/')[1]?.split('?')[0] || '';
+        } else if (url.includes('youtube.com/embed/')) {
+          videoId = url.split('youtube.com/embed/')[1]?.split('?')[0] || '';
+        }
+        return `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      }
+      if (url.includes('twitch.tv')) {
+        const channel = url.split('twitch.tv/')[1]?.split('?')[0] || '';
+        return `https://player.twitch.tv/?channel=${channel}&parent=${window.location.hostname}&autoplay=true`;
+      }
+    } catch (e) {}
+    return null;
+  };
+
   const [autoVoiceEnabled, setAutoVoiceEnabled] = useState(false);
   const lastSpokenTextRef = useRef<string>("");
 
@@ -503,51 +551,140 @@ export default function MatchCenter() {
               {/* Left Column: Live Streaming Player */}
               <div className="lg:col-span-2 space-y-6">
                 <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-black aspect-video group">
-                  {/* The actual looping video stream */}
-                  <video 
-                    src="https://assets.mixkit.co/videos/preview/mixkit-soccer-ball-passing-in-a-grass-field-34444-large.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-cover"
-                  />
+                  {activeServer === 'CUSTOM' && streamUrl ? (
+                    (() => {
+                      const embedUrl = getEmbedUrl(streamUrl);
+                      if (embedUrl) {
+                        return (
+                          <iframe
+                            src={embedUrl}
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        );
+                      }
+                      return (
+                        <video
+                          src={streamUrl}
+                          autoPlay
+                          controls
+                          className="w-full h-full object-cover"
+                        />
+                      );
+                    })()
+                  ) : (
+                    <>
+                      {/* The actual looping video stream */}
+                      <video 
+                        src="https://assets.mixkit.co/videos/preview/mixkit-soccer-ball-passing-in-a-grass-field-34444-large.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-cover"
+                      />
 
-                  {/* Top Bar Controls Overlay */}
-                  <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
-                    <div className="flex items-center gap-2">
-                      <span className="bg-red-600 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1.5 shadow-md">
-                        <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
-                        LIVE
-                      </span>
-                      <span className="bg-slate-950/70 text-slate-300 font-mono text-[10px] px-2 py-0.5 rounded backdrop-blur-sm border border-slate-800/40">
-                        1080p60 Source
-                      </span>
-                    </div>
+                      {/* Top Bar Controls Overlay */}
+                      <div className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-red-600 text-white font-bold text-[10px] uppercase tracking-wider px-2 py-0.5 rounded flex items-center gap-1.5 shadow-md">
+                            <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
+                            LIVE
+                          </span>
+                          <span className="bg-slate-950/70 text-slate-300 font-mono text-[10px] px-2 py-0.5 rounded backdrop-blur-sm border border-slate-800/40">
+                            1080p60 Source
+                          </span>
+                        </div>
 
-                    <div className="flex items-center gap-1.5 bg-slate-950/70 text-brand-green font-bold text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm border border-brand-green/20 shadow-md">
-                      <span className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></span>
-                      WFC TV Live Feed
+                        <div className="flex items-center gap-1.5 bg-slate-950/70 text-brand-green font-bold text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm border border-brand-green/20 shadow-md">
+                          <span className="w-1.5 h-1.5 bg-brand-green rounded-full animate-pulse"></span>
+                          WFC TV Live Feed
+                        </div>
+                      </div>
+
+                      {/* Bottom Controls Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-between z-10 text-white text-xs">
+                        <div className="flex items-center gap-4">
+                          <button className="hover:text-brand-green transition">
+                            <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                          </button>
+                          <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 fill-current text-slate-300" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                            <span className="w-16 h-1 bg-slate-700 rounded-full relative overflow-hidden"><span className="absolute top-0 left-0 h-full w-3/4 bg-brand-green"></span></span>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 text-slate-300 font-mono text-[10px]">
+                          <span>Latency: 1.4s</span>
+                          <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
+                          <span>Rate: 5.4 Mbps</span>
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Streaming Source Selector & Custom Connector */}
+                <div className="glass-panel p-6 rounded-2xl space-y-6">
+                  <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                    <h4 className="font-black text-white text-xs uppercase tracking-widest flex items-center gap-2">
+                      🔌 Stream Feed Source Settings
+                    </h4>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setActiveServer('PRESET')}
+                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition ${
+                          activeServer === 'PRESET'
+                            ? 'bg-brand-green text-slate-950'
+                            : 'bg-slate-900 text-slate-400 border border-slate-850 hover:text-white'
+                        }`}
+                      >
+                        Default Server
+                      </button>
+                      <button
+                        onClick={() => setActiveServer('CUSTOM')}
+                        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase transition ${
+                          activeServer === 'CUSTOM'
+                            ? 'bg-brand-green text-slate-950'
+                            : 'bg-slate-900 text-slate-400 border border-slate-850 hover:text-white'
+                        }`}
+                      >
+                        Connected Feed
+                      </button>
                     </div>
                   </div>
 
-                  {/* Bottom Controls Overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-center justify-between z-10 text-white text-xs">
-                    <div className="flex items-center gap-4">
-                      <button className="hover:text-brand-green transition">
-                        <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                  <div className="space-y-4">
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      To stream live matches, paste any YouTube stream link, Twitch channel URL, or direct video feed (.mp4 / .m3u8 HLS feed) below:
+                    </p>
+                    <div className="flex gap-3">
+                      <input
+                        type="url"
+                        value={streamUrl}
+                        onChange={(e) => setStreamUrl(e.target.value)}
+                        placeholder="https://www.youtube.com/watch?v=... or custom stream link"
+                        className="bg-slate-900 border border-slate-800 text-white text-xs px-4 py-3 rounded-xl focus:outline-none focus:border-brand-green grow"
+                      />
+                      <button
+                        onClick={() => saveStreamUrl(streamUrl)}
+                        className="bg-brand-green hover:bg-emerald-400 text-slate-950 font-black px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shrink-0"
+                      >
+                        Connect Feed
                       </button>
-                      <div className="flex items-center gap-2">
-                        <svg className="w-4 h-4 fill-current text-slate-300" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                        <span className="w-16 h-1 bg-slate-700 rounded-full relative overflow-hidden"><span className="absolute top-0 left-0 h-full w-3/4 bg-brand-green"></span></span>
+                    </div>
+                    {streamUrl && (
+                      <div className="text-[10px] text-slate-500 flex items-center justify-between bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-900">
+                        <span className="truncate max-w-[80%]">Connected Source: <span className="font-mono text-emerald-400 break-all">{streamUrl}</span></span>
+                        <button
+                          onClick={() => saveStreamUrl('')}
+                          className="text-red-400 hover:underline font-bold ml-2 shrink-0"
+                        >
+                          Clear Feed
+                        </button>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 text-slate-300 font-mono text-[10px]">
-                      <span>Latency: 1.4s</span>
-                      <span className="w-1 h-1 bg-slate-800 rounded-full"></span>
-                      <span>Rate: 5.4 Mbps</span>
-                    </div>
+                    )}
                   </div>
                 </div>
 
