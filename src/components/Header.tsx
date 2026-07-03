@@ -30,7 +30,7 @@ export default function Header() {
       }
     }
     fetchTicker();
-    const interval = setInterval(fetchTicker, 15000); // 15s updates for ticker
+    const interval = setInterval(fetchTicker, 5000); // 5s updates for ticker
     return () => clearInterval(interval);
   }, []);
 
