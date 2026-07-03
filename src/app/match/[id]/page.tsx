@@ -91,6 +91,21 @@ export default function MatchCenter() {
     return () => clearInterval(interval);
   }, [id]);
 
+  useEffect(() => {
+    if (autoVoiceEnabled && match?.commentary) {
+      try {
+        const comms = JSON.parse(match.commentary);
+        if (comms.length > 0) {
+          const latestText = comms[0].text;
+          if (latestText && latestText !== lastSpokenTextRef.current) {
+            speakText(latestText);
+            lastSpokenTextRef.current = latestText;
+          }
+        }
+      } catch (e) {}
+    }
+  }, [match?.commentary, autoVoiceEnabled]);
+
   const handlePredictSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (predictionChoice) {
@@ -123,15 +138,7 @@ export default function MatchCenter() {
   const events = match.events ? JSON.parse(match.events) : [];
   const commentary = match.commentary ? JSON.parse(match.commentary) : [];
 
-  useEffect(() => {
-    if (autoVoiceEnabled && commentary.length > 0) {
-      const latestText = commentary[0].text;
-      if (latestText && latestText !== lastSpokenTextRef.current) {
-        speakText(latestText);
-        lastSpokenTextRef.current = latestText;
-      }
-    }
-  }, [commentary, autoVoiceEnabled]);
+
 
   // Team players list mock fallback
   const teamAPlayers = [
