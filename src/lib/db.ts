@@ -715,12 +715,77 @@ export const dbMock = {
   },
   match: {
     findMany: async (args?: any) => {
+      const apiKey = process.env.FOOTBALL_API_KEY;
+      if (apiKey) {
+        try {
+          const res = await fetch("https://api.football-data.org/v4/matches", {
+            headers: { "X-Auth-Token": apiKey },
+            next: { revalidate: 30 }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && Array.isArray(data.matches)) {
+              const realMatches = data.matches.map((m: any) => {
+                let status = "SCHEDULED";
+                if (m.status === "IN_PLAY" || m.status === "PAUSED") status = "LIVE";
+                if (m.status === "FINISHED") status = "FT";
+                
+                return {
+                  id: `api-match-${m.id}`,
+                  teamAId: `api-team-${m.homeTeam.id}`,
+                  teamBId: `api-team-${m.awayTeam.id}`,
+                  teamAScore: m.score.fullTime.home ?? 0,
+                  teamBScore: m.score.fullTime.away ?? 0,
+                  status,
+                  timeElapsed: m.status === "IN_PLAY" ? 45 : 90,
+                  datetime: new Date(m.utcDate),
+                  venue: m.venue || "Stadium",
+                  stage: m.stage || "Group Stage",
+                  groupName: m.group || "Group A",
+                  stats: JSON.stringify({
+                    possession: { teamA: 50, teamB: 50 },
+                    shots: { teamA: 10, teamB: 10 },
+                    shotsOnTarget: { teamA: 4, teamB: 4 },
+                    fouls: { teamA: 10, teamB: 10 },
+                    yellowCards: { teamA: 1, teamB: 1 },
+                    redCards: { teamA: 0, teamB: 0 },
+                    corners: { teamA: 5, teamB: 5 }
+                  }),
+                  events: JSON.stringify([]),
+                  commentary: JSON.stringify([]),
+                  teamA: {
+                    id: `api-team-${m.homeTeam.id}`,
+                    name: m.homeTeam.name,
+                    code: m.homeTeam.tla || m.homeTeam.name.substring(0, 3).toUpperCase(),
+                    flagUrl: m.homeTeam.crest || `https://flagcdn.com/w320/un.png`
+                  },
+                  teamB: {
+                    id: `api-team-${m.awayTeam.id}`,
+                    name: m.awayTeam.name,
+                    code: m.awayTeam.tla || m.awayTeam.name.substring(0, 3).toUpperCase(),
+                    flagUrl: m.awayTeam.crest || `https://flagcdn.com/w320/un.png`
+                  }
+                };
+              });
+              
+              if (realMatches.length > 0) {
+                if (args?.where?.status) {
+                  return realMatches.filter((m: any) => m.status === args.where.status);
+                }
+                return realMatches;
+              }
+            }
+          }
+        } catch (err) {
+          console.error("Failed to fetch real matches:", err);
+        }
+      }
+
       simulateLiveMatches();
       let results = [...mockStore.matches];
       if (args?.where?.status) {
         results = results.filter(m => m.status === args.where.status);
       }
-      // Map relations
       results = results.map(m => ({
         ...m,
         teamA: mockStore.teams.find(t => t.id === m.teamAId),
@@ -729,6 +794,62 @@ export const dbMock = {
       return results;
     },
     findUnique: async ({ where, include }: { where: { id: string }; include?: any }) => {
+      const apiKey = process.env.FOOTBALL_API_KEY;
+      if (apiKey && where.id.startsWith("api-match-")) {
+        const matchId = where.id.replace("api-match-", "");
+        try {
+          const res = await fetch(`https://api.football-data.org/v4/matches/${matchId}`, {
+            headers: { "X-Auth-Token": apiKey },
+            next: { revalidate: 15 }
+          });
+          if (res.ok) {
+            const m = await res.json();
+            let status = "SCHEDULED";
+            if (m.status === "IN_PLAY" || m.status === "PAUSED") status = "LIVE";
+            if (m.status === "FINISHED") status = "FT";
+
+            return {
+              id: where.id,
+              teamAId: `api-team-${m.homeTeam.id}`,
+              teamBId: `api-team-${m.awayTeam.id}`,
+              teamAScore: m.score.fullTime.home ?? 0,
+              teamBScore: m.score.fullTime.away ?? 0,
+              status,
+              timeElapsed: m.status === "IN_PLAY" ? 45 : 90,
+              datetime: new Date(m.utcDate),
+              venue: m.venue || "Stadium",
+              stage: m.stage || "Group Stage",
+              groupName: m.group || "Group A",
+              stats: JSON.stringify({
+                possession: { teamA: 50, teamB: 50 },
+                shots: { teamA: 10, teamB: 10 },
+                shotsOnTarget: { teamA: 4, teamB: 4 },
+                fouls: { teamA: 10, teamB: 10 },
+                yellowCards: { teamA: 1, teamB: 1 },
+                redCards: { teamA: 0, teamB: 0 },
+                corners: { teamA: 5, teamB: 5 }
+              }),
+              events: JSON.stringify([]),
+              commentary: JSON.stringify([]),
+              teamA: {
+                id: `api-team-${m.homeTeam.id}`,
+                name: m.homeTeam.name,
+                code: m.homeTeam.tla || m.homeTeam.name.substring(0, 3).toUpperCase(),
+                flagUrl: m.homeTeam.crest || `https://flagcdn.com/w320/un.png`
+              },
+              teamB: {
+                id: `api-team-${m.awayTeam.id}`,
+                name: m.awayTeam.name,
+                code: m.awayTeam.tla || m.awayTeam.name.substring(0, 3).toUpperCase(),
+                flagUrl: m.awayTeam.crest || `https://flagcdn.com/w320/un.png`
+              }
+            };
+          }
+        } catch (err) {
+          console.error("Failed to fetch real match details:", err);
+        }
+      }
+
       simulateLiveMatches();
       const match = mockStore.matches.find(m => m.id === where.id);
       if (!match) return null;
