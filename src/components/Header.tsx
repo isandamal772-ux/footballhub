@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, Globe, Heart, Trophy, Activity, Users, User, GitCompare } from 'lucide-react';
+import { Menu, X, Search, Globe, Heart, Trophy, Activity, Users, User, GitCompare, Sparkles } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 export default function Header() {
@@ -49,6 +49,7 @@ export default function Header() {
     { href: '/teams', label: 'Teams', icon: Users },
     { href: '/players', label: 'Players', icon: User },
     { href: '/compare', label: t('compare'), icon: GitCompare },
+    { href: '/fan-zone', label: 'Fan Zone', icon: Sparkles },
   ];
 
   return (
