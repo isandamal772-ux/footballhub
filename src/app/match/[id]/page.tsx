@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Shield, Clock, MapPin, Award, Users, ChevronLeft, Heart, MessageSquare, AlertCircle } from 'lucide-react';
@@ -25,6 +25,32 @@ export default function MatchCenter() {
   const [loading, setLoading] = useState(true);
 
   const isFavorite = favorites.matches.includes(id);
+
+  const [autoVoiceEnabled, setAutoVoiceEnabled] = useState(false);
+  const lastSpokenTextRef = useRef<string>("");
+
+  const speakText = (text: string) => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const englishVoice = voices.find(v => v.lang.startsWith('en'));
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   async function loadMatchDetail() {
     try {
@@ -96,6 +122,16 @@ export default function MatchCenter() {
   const stats = match.stats ? JSON.parse(match.stats) : {};
   const events = match.events ? JSON.parse(match.events) : [];
   const commentary = match.commentary ? JSON.parse(match.commentary) : [];
+
+  useEffect(() => {
+    if (autoVoiceEnabled && commentary.length > 0) {
+      const latestText = commentary[0].text;
+      if (latestText && latestText !== lastSpokenTextRef.current) {
+        speakText(latestText);
+        lastSpokenTextRef.current = latestText;
+      }
+    }
+  }, [commentary, autoVoiceEnabled]);
 
   // Team players list mock fallback
   const teamAPlayers = [
@@ -316,20 +352,50 @@ export default function MatchCenter() {
 
               {/* Live commentary text stream */}
               <div className="md:col-span-7 glass-panel rounded-2xl p-6 space-y-4">
-                <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3 flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-emerald-400" />
-                  Live Commentary Stream
+                <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3 flex items-center justify-between gap-1.5">
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare className="w-4 h-4 text-emerald-400" />
+                    Live Commentary Stream
+                  </span>
+                  <button
+                    onClick={() => {
+                      const nextState = !autoVoiceEnabled;
+                      setAutoVoiceEnabled(nextState);
+                      if (nextState && commentary.length > 0) {
+                        speakText("Audio commentary enabled. " + commentary[0].text);
+                        lastSpokenTextRef.current = commentary[0].text;
+                      } else {
+                        if (typeof window !== 'undefined') window.speechSynthesis.cancel();
+                      }
+                    }}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all duration-300 ${
+                      autoVoiceEnabled
+                        ? 'bg-amber-400 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.3)] animate-pulse'
+                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    {autoVoiceEnabled ? '🔊 Audio ON' : '🔇 Audio OFF'}
+                  </button>
                 </h3>
 
                 <div className="space-y-4 max-h-[30rem] overflow-y-auto pr-2">
                   {commentary.map((c: any, idx: number) => (
-                    <div key={idx} className="flex gap-4 border-b border-slate-900/60 pb-3 text-xs leading-relaxed">
-                      <span className="font-mono font-bold text-brand-green text-sm shrink-0 w-8">
-                        {c.time ? `${c.time}'` : 'INFO'}
-                      </span>
-                      <p className="text-slate-300">
-                        {c.text}
-                      </p>
+                    <div key={idx} className="flex gap-4 border-b border-slate-900/60 pb-3 text-xs leading-relaxed group/item justify-between items-start">
+                      <div className="flex gap-4 grow">
+                        <span className="font-mono font-bold text-brand-green text-sm shrink-0 w-8">
+                          {c.time ? `${c.time}'` : 'INFO'}
+                        </span>
+                        <p className="text-slate-300">
+                          {c.text}
+                        </p>
+                      </div>
+                      <button
+                        onClick={() => speakText(c.text)}
+                        className="text-slate-500 hover:text-amber-400 p-1 opacity-0 group-hover/item:opacity-100 focus:opacity-100 transition duration-200 shrink-0"
+                        title="Read commentary aloud"
+                      >
+                        🔊
+                      </button>
                     </div>
                   ))}
                   {commentary.length === 0 && (
