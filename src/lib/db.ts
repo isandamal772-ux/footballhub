@@ -718,7 +718,9 @@ export const dbMock = {
       const apiKey = process.env.FOOTBALL_API_KEY || "7e46bf08406447bfa63704fbbc86acd5";
       if (apiKey) {
         try {
-          const res = await fetch("https://api.football-data.org/v4/matches", {
+          const dateFrom = new Date(Date.now() - 86400000 * 3).toISOString().split('T')[0]; // 3 days ago
+          const dateTo = new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0];   // 4 days later
+          const res = await fetch(`https://api.football-data.org/v4/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`, {
             headers: { "X-Auth-Token": apiKey },
             next: { revalidate: 30 }
           });
@@ -755,14 +757,14 @@ export const dbMock = {
                   commentary: JSON.stringify([]),
                   teamA: {
                     id: `api-team-${m.homeTeam.id}`,
-                    name: m.homeTeam.name,
-                    code: m.homeTeam.tla || m.homeTeam.name.substring(0, 3).toUpperCase(),
+                    name: m.homeTeam.name || "TBD Team",
+                    code: m.homeTeam.tla || (m.homeTeam.name ? m.homeTeam.name.substring(0, 3).toUpperCase() : "TBD"),
                     flagUrl: m.homeTeam.crest || `https://flagcdn.com/w320/un.png`
                   },
                   teamB: {
                     id: `api-team-${m.awayTeam.id}`,
-                    name: m.awayTeam.name,
-                    code: m.awayTeam.tla || m.awayTeam.name.substring(0, 3).toUpperCase(),
+                    name: m.awayTeam.name || "TBD Team",
+                    code: m.awayTeam.tla || (m.awayTeam.name ? m.awayTeam.name.substring(0, 3).toUpperCase() : "TBD"),
                     flagUrl: m.awayTeam.crest || `https://flagcdn.com/w320/un.png`
                   }
                 };
