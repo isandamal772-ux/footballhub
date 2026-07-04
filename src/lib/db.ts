@@ -28,7 +28,7 @@ export interface MockDataStore {
   favorites: any[];
 }
 
-const teamBlueprints = [
+let teamBlueprints = [
   { id: "team-arg", name: "Argentina", code: "ARG", flag: "ar", group: "Group A", rank: 1, coach: "Lionel Scaloni", form: "W,W,W,D,W" },
   { id: "team-fra", name: "France", code: "FRA", flag: "fr", group: "Group A", rank: 2, coach: "Didier Deschamps", form: "W,L,W,W,W" },
   { id: "team-esp", name: "Spain", code: "ESP", flag: "es", group: "Group C", rank: 3, coach: "Luis de la Fuente", form: "W,W,W,W,W" },
@@ -80,6 +80,40 @@ const teamBlueprints = [
   { id: "team-sct", name: "Scotland", code: "SCO", flag: "gb-sct", group: "Group D", rank: 74, coach: "Steve Clarke", form: "W,W,D,L,L" },
   { id: "team-wls", name: "Wales", code: "WAL", flag: "gb-wls", group: "Group C", rank: 76, coach: "Craig Bellamy", form: "W,D,W,D,D" }
 ];
+
+const extraCountriesRaw = "Iceland;ISL;is;Group A;71;Åge Hareide|Finland;FIN;fi;Group B;62;Markku Kanerva|Slovakia;SVK;sk;Group D;41;Francesco Calzona|Slovenia;SVN;si;Group E;55;Matjaž Kek|Bulgaria;BUL;bg;Group G;83;Ilian Iliev|Ireland;IRL;ie;Group H;58;Heimir Hallgrímsson|Northern Ireland;NIR;gb-nir;Group I;73;Michael O'Neill|Serbia;SRB;rs;Group L;35;Dragan Stojković|Bosnia and Herzegovina;BIH;ba;Group A;75;Sergej Barbarez|Albania;ALB;al;Group B;66;Sylvinho|Georgia;GEO;ge;Group C;70;Willy Sagnol|Armenia;ARM;am;Group D;96;Oleksandr Petrakov|Azerbaijan;AZE;az;Group E;113;Fernando Santos|Kazakhstan;KAZ;kz;Group F;109;Stanislav Cherchesov|Cyprus;CYP;cy;Group G;121;Sofronis Avgousti|Malta;MLT;mt;Group H;171;Davide Mazzotta|Luxembourg;LUX;lu;Group I;89;Luc Holtz|Liechtenstein;LIE;li;Group J;200;Konrad Fünfstück|Andorra;AND;ad;Group K;169;Koldo Álvarez|San Marino;SMR;sm;Group L;210;Roberto Cevoli|Gibraltar;GIB;gi;Group A;197;Julio César Ribas|Faroe Islands;FRO;fo;Group B;138;Håkan Ericson|Moldova;MDA;md;Group C;102;Serghei Cleşcenco|North Macedonia;MKD;mk;Group D;68;Blagoja Milevski|Kosovo;KOS;xk;Group E;101;Franco Foda|Montenegro;MNE;me;Group F;72;Robert Prosinečki|Estonia;EST;ee;Group G;124;Jürgen Henn|Latvia;LVA;lv;Group H;137;Paolo Nicolato|Lithuania;LTU;lt;Group I;141;Edgaras Jankauskas|Belarus;BLR;by;Group J;97;Carlos Alós|Venezuela;VEN;ve;Group K;44;Fernando Batista|Paraguay;PAR;py;Group L;56;Gustavo Alfaro|Bolivia;BOL;bo;Group A;82;Oscar Villegas|New Zealand;NZL;nz;Group B;91;Darren Bazeley|Solomon Islands;SOL;sb;Group C;132;Josh Smith|Fiji;FJI;fj;Group D;146;Rob Sherman|New Caledonia;NCL;nc;Group E;158;Johann Sidaner|Tahiti;TAH;pf;Group F;161;Samuel Garcia|Vanuatu;VAN;vu;Group G;164;Juliano Schmeling|Papua New Guinea;PNG;pg;Group H;168;Warren Moon|Samoa;SAM;ws;Group I;186;Paul Ifill|Tonga;TGA;to;Group J;199;Kilifi Uele|Cook Islands;COK;ck;Group K;187;Tuka Tisam|American Samoa;ASA;as;Group L;188;Ruben Luvu|Cabo Verde;CPV;cv;Group A;65;Bubista|DR Congo;COD;cd;Group B;57;Sébastien Desabre|Guinea;GUI;gn;Group C;78;Kaba Diawara|Equatorial Guinea;EQG;gq;Group D;88;Juan Micha|Zambia;ZAM;zm;Group E;93;Avram Grant|Uganda;UGA;ug;Group F;90;Paul Put|Gabon;GAB;ga;Group G;84;Thierry Mouyouma|Kenya;KEN;ke;Group H;102;Engin Fırat|Zimbabwe;ZIM;zw;Group I;117;Michael Nees|Angola;ANG;ao;Group J;85;Pedro Gonçalves|Benin;BEN;bj;Group K;95;Gernot Rohr|Congo;CGO;cg;Group L;112;Isaac Ngata|Madagascar;MAD;mg;Group A;108;Romuald Rakotondrabe|Mozambique;MOZ;mz;Group B;103;Chiquinho Conde|Mauritania;MTN;mr;Group C;114;Amir Abdou|Namibia;NAM;na;Group D;115;Collin Benjamin|Togo;TOG;tg;Group E;119;Daré Nibombé|Libya;LBY;ly;Group F;120;Milutin Sredojević|Sudan;SDN;sd;Group G;121;James Kwesi Appiah|Sierra Leone;SLE;sl;Group H;122;Amidu Karim|Central African Republic;CTA;cf;Group I;125;Raoul Savoy|Niger;NIG;ne;Group J;127;Badou Zaki|Rwanda;RWA;rw;Group K;128;Torsten Spittler|Gambia;GAM;gm;Group L;129;Johnny McKinstry|Tanzania;TAN;tz;Group A;130;Hemed Suleiman|Ethiopia;ETH;et;Group B;131;Gebremedhin Haile|Malawi;MWI;mw;Group C;132;Patrick Mabedi|Liberia;LBR;lr;Group D;133;Mario Marinică|Eswatini;SWZ;sz;Group E;134;Zdravko Logarušić|Botswana;BOT;bw;Group F;135;Didier Gomes Da Rosa|Lesotho;LES;ls;Group G;136;Leslie Notši|Burundi;BDI;bi;Group H;137;Etienne Ndayiragije|South Sudan;SSD;ss;Group I;138;Nicolas Dupuis|Mauritius;MRI;mu;Group J;139;Guillaume Moulin|Somalia;SOM;so;Group K;140;Rachid Lousteque|Seychelles;SEY;sc;Group L;141;Ralph Jean-Louis|Djibouti;DJI;dj;Group A;142;Abdourahman Okieh|Eritrea;ERI;er;Group B;143;Alemseged Efrem|Chad;CHA;td;Group C;144;Kevin Nicaise|Sao Tome and Principe;STP;st;Group D;145;Adriano Eusébio";
+
+const remainingCountriesRaw = "Panama;PAN;pa|Jamaica;JAM;jm|Honduras;HON;hn|El Salvador;SLV;sv|Haiti;HAI;ht|Curaçao;CUW;cw|Trinidad and Tobago;TRI;tt|Guatemala;GUA;gt|Nicaragua;NCA;ni|Suriname;SUR;sr|Antigua and Barbuda;ATG;ag|Dominican Republic;DOM;do|Bermuda;BER;bm|Barbados;BRB;bb|Grenada;GRN;gd|St. Vincent and the Grenadines;VIN;vc|Cuba;CUB;cu|Puerto Rico;PUR;pr|Guyana;GUY;gy|Belize;BLZ;bz|St. Lucia;LCA;lc|Montserrat;MSR;ms|Dominica;DMA;dm|Aruba;ARU;aw|Cayman Islands;CAY;ky|St. Kitts and Nevis;SKN;kn|Anguilla;AIA;ai|Turks and Caicos Islands;TCA;tc|British Virgin Islands;VGB;vg|US Virgin Islands;VIR;vi|Bahamas;BAH;bs|Sri Lanka;SRI;lk|Pakistan;PAK;pk|Bhutan;BHU;bt|India;IND;in|Vietnam;VIE;vn|Lebanon;LBN;lb|Tajikistan;TJK;tj|Thailand;THA;th|Yemen;YEM;ye|Kuwait;KUW;kw|Hong Kong;HKG;hk|Indonesia;IDN;id|Malaysia;MAS;my|Singapore;SGP;sg|Maldives;MDV;mv|Philippines;PHI;ph|Afghanistan;AFG;af|Chinese Taipei;TPE;tw|Myanmar;MYA;mm|Cambodia;KHM;kh|Bangladesh;BAN;bd|Nepal;NEP;np|Macau;MAC;mo|Laos;LAO;la|Mongolia;MNG;mn|Brunei;BRU;bn|Timor-Leste;TLS;tl|Guam;GUM;gu|Iraq;IRQ;iq|Uzbekistan;UZB;uz|United Arab Emirates;UAE;ae|Jordan;JOR;jo|Oman;OMA;om|Bahrain;BHR;bh|China PR;CHN;cn|Syria;SYR;sy|Palestine;PLE;ps|Kyrgyz Republic;KGZ;kg";
+
+extraCountriesRaw.split('|').forEach(c => {
+  const parts = c.split(';');
+  teamBlueprints.push({
+    id: `team-${parts[1].toLowerCase()}`,
+    name: parts[0],
+    code: parts[1],
+    flag: parts[2],
+    group: parts[3],
+    rank: parseInt(parts[4]),
+    coach: parts[5],
+    form: "W,D,W"
+  });
+});
+
+let tempRank = 146;
+const groupsList = ["Group A", "Group B", "Group C", "Group D", "Group E", "Group F", "Group G", "Group H", "Group I", "Group J", "Group K", "Group L"];
+remainingCountriesRaw.split('|').forEach((c, idx) => {
+  const parts = c.split(';');
+  teamBlueprints.push({
+    id: `team-${parts[1].toLowerCase()}`,
+    name: parts[0],
+    code: parts[1],
+    flag: parts[2],
+    group: groupsList[idx % groupsList.length],
+    rank: tempRank++,
+    coach: "National Head Coach",
+    form: "D,W,L"
+  });
+});
 
 const superstarPlayers = [
   // ARGENTINA
