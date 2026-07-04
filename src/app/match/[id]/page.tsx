@@ -18,7 +18,7 @@ export default function MatchCenter() {
   const [match, setMatch] = useState<any>(null);
   const [nextMatchA, setNextMatchA] = useState<any>(null);
   const [nextMatchB, setNextMatchB] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'STREAM' | 'STATS' | 'LINEUPS' | 'PREDICTIONS'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'STREAM' | 'STATS' | 'LINEUPS' | 'PREDICTIONS' | 'HIGHLIGHTS'>('OVERVIEW');
   const [predictionSubmitted, setPredictionSubmitted] = useState(false);
   const [predictionChoice, setPredictionChoice] = useState<string | null>(null);
   const [predictionsCounts, setPredictionsCounts] = useState({ WinA: 55, Draw: 20, WinB: 25 });
@@ -48,6 +48,31 @@ export default function MatchCenter() {
       } else {
         localStorage.removeItem(`match-stream-${id}`);
         setActiveServer('PRESET');
+      }
+    }
+  };
+
+  const [highlightsUrl, setHighlightsUrl] = useState<string>("");
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`match-highlights-${id}`);
+      if (saved) {
+        setHighlightsUrl(saved);
+      } else if (id === 'match-2' || id === 'api-match-438179') {
+        // Fallback default highlights video for yesterday's matches
+        setHighlightsUrl("https://www.youtube.com/watch?v=F3_6K24QZ_c");
+      }
+    }
+  }, [id]);
+
+  const saveHighlightsUrl = (url: string) => {
+    setHighlightsUrl(url);
+    if (typeof window !== 'undefined') {
+      if (url) {
+        localStorage.setItem(`match-highlights-${id}`, url);
+      } else {
+        localStorage.removeItem(`match-highlights-${id}`);
       }
     }
   };
@@ -358,7 +383,7 @@ export default function MatchCenter() {
 
         {/* TAB BAR HEADER */}
         <div className="flex border-b border-slate-900 text-sm overflow-x-auto no-scrollbar">
-          {(['OVERVIEW', 'STREAM', 'STATS', 'LINEUPS', 'PREDICTIONS'] as const).map((tab) => (
+          {(['OVERVIEW', 'STREAM', 'HIGHLIGHTS', 'STATS', 'LINEUPS', 'PREDICTIONS'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -370,6 +395,7 @@ export default function MatchCenter() {
             >
               {tab === 'OVERVIEW' && 'Overview & Live Feed'}
               {tab === 'STREAM' && '🔴 Live Stream'}
+              {tab === 'HIGHLIGHTS' && '🎬 Match Highlights'}
               {tab === 'STATS' && 'Match Statistics'}
               {tab === 'LINEUPS' && 'Lineups / Formations'}
               {tab === 'PREDICTIONS' && 'Fan Predictions'}
@@ -781,6 +807,86 @@ export default function MatchCenter() {
                       Send
                     </button>
                   </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: MATCH HIGHLIGHTS */}
+          {activeTab === 'HIGHLIGHTS' && (
+            <div className="max-w-4xl mx-auto space-y-6">
+              <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-black aspect-video group shadow-2xl">
+                {highlightsUrl ? (
+                  (() => {
+                    const embedUrl = getEmbedUrl(highlightsUrl);
+                    if (embedUrl) {
+                      return (
+                        <iframe
+                          src={embedUrl}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        ></iframe>
+                      );
+                    }
+                    return (
+                      <video
+                        src={highlightsUrl}
+                        autoPlay
+                        controls
+                        className="w-full h-full object-cover"
+                      />
+                    );
+                  })()
+                ) : (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-slate-950/80">
+                    <span className="text-4xl">🎬</span>
+                    <h4 className="font-bold text-white text-sm">No Highlights Video Connected Yet</h4>
+                    <p className="text-slate-400 text-xs max-w-sm">
+                      Paste a YouTube match highlights link below to connect and watch highlights for this match!
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Highlights Link Input Configurator */}
+              <div className="glass-panel p-6 rounded-2xl space-y-6">
+                <div className="flex items-center justify-between border-b border-slate-900 pb-3">
+                  <h4 className="font-black text-white text-xs uppercase tracking-widest flex items-center gap-2">
+                    🔌 Connect Match Highlights Feed
+                  </h4>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-[11px] text-slate-400 leading-relaxed">
+                    Paste any YouTube match highlights URL below to watch the video directly on this page:
+                  </p>
+                  <div className="flex gap-3">
+                    <input
+                      type="url"
+                      value={highlightsUrl}
+                      onChange={(e) => setHighlightsUrl(e.target.value)}
+                      placeholder="e.g. https://www.youtube.com/watch?v=F3_6K24QZ_c"
+                      className="bg-slate-900 border border-slate-800 text-white text-xs px-4 py-3 rounded-xl focus:outline-none focus:border-brand-green grow"
+                    />
+                    <button
+                      onClick={() => saveHighlightsUrl(highlightsUrl)}
+                      className="bg-brand-green hover:bg-emerald-400 text-slate-950 font-black px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shrink-0"
+                    >
+                      Save Highlights
+                    </button>
+                  </div>
+                  {highlightsUrl && (
+                    <div className="text-[10px] text-slate-500 flex items-center justify-between bg-slate-950/40 px-3 py-2 rounded-lg border border-slate-900">
+                      <span className="truncate max-w-[85%]">Active Highlights Source: <span className="font-mono text-emerald-400 break-all">{highlightsUrl}</span></span>
+                      <button
+                        onClick={() => saveHighlightsUrl('')}
+                        className="text-red-400 hover:underline font-bold ml-2 shrink-0"
+                      >
+                        Clear Video
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
