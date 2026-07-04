@@ -254,8 +254,8 @@ export default function ComparisonEngine() {
                   {/* Banner Header comparison */}
                   <div className="grid grid-cols-3 items-center gap-4 text-center border-b border-slate-900 pb-6">
                     <div className="space-y-1">
-                      <div className="w-12 h-12 rounded-full bg-brand-green text-slate-950 font-black text-sm flex items-center justify-center mx-auto border border-brand-green/20">
-                        {playerA.name.charAt(0)}
+                      <div className="w-12 h-8 mx-auto border border-slate-800 rounded overflow-hidden shadow-md">
+                        <img src={playerA.team?.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-full h-full object-cover" />
                       </div>
                       <h3 className="text-sm font-black text-white mt-2">{playerA.name}</h3>
                       <span className="text-[10px] text-slate-400">{playerA.position}</span>
@@ -264,8 +264,8 @@ export default function ComparisonEngine() {
                       <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 font-bold text-xs"><ArrowLeftRight className="w-4.5 h-4.5 text-brand-green" /></div>
                     </div>
                     <div className="space-y-1">
-                      <div className="w-12 h-12 rounded-full bg-emerald-800 text-white font-black text-sm flex items-center justify-center mx-auto border border-brand-green/20">
-                        {playerB.name.charAt(0)}
+                      <div className="w-12 h-8 mx-auto border border-slate-800 rounded overflow-hidden shadow-md">
+                        <img src={playerB.team?.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-full h-full object-cover" />
                       </div>
                       <h3 className="text-sm font-black text-white mt-2">{playerB.name}</h3>
                       <span className="text-[10px] text-slate-400">{playerB.position}</span>

@@ -104,11 +104,7 @@ export default function PlayersDirectory() {
                     return (
                       <tr key={p.id} className="border-b border-slate-900/40 hover:bg-slate-900/15 transition">
                         <td className="py-4 px-6 font-bold text-white flex items-center gap-3">
-                          {p.imageUrl ? (
-                            <img src={p.imageUrl} alt="" className="w-8 h-8 object-cover rounded-full border border-brand-green/20" />
-                          ) : (
-                            <div className="w-8 h-8 rounded-full bg-brand-green/15 text-brand-green font-black flex items-center justify-center text-xs shrink-0">{p.name.charAt(0)}</div>
-                          )}
+                          <img src={p.team?.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-6.5 h-4.5 object-cover rounded-sm border border-slate-800 shrink-0 shadow-sm" />
                           <Link href={`/players/${p.id}`} className="hover:text-brand-green transition-colors">
                             {p.name}
                           </Link>

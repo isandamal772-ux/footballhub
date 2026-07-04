@@ -95,19 +95,13 @@ export default function PlayerDetail() {
 
           <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
             {/* Avatar block */}
-            <div className="relative w-20 h-20 md:w-24 md:h-24 shrink-0">
-              {player.imageUrl ? (
-                <img
-                  src={player.imageUrl}
-                  alt={player.name}
-                  className="w-full h-full rounded-full object-cover border-2 border-brand-green/30 shadow-2xl"
-                />
-              ) : (
-                <div className="w-full h-full rounded-full bg-gradient-to-tr from-brand-green to-emerald-700 flex items-center justify-center text-3xl font-black text-slate-950 border-2 border-brand-green/30">
-                  {player.name.charAt(0)}
-                </div>
-              )}
-              <span className="absolute -bottom-1 -right-1 bg-slate-950 text-brand-green font-mono font-bold text-xs border border-slate-800 px-2 py-0.5 rounded-full">
+            <div className="relative w-20 h-14 md:w-24 md:h-16 shrink-0">
+              <img
+                src={player.team?.flagUrl || `https://flagcdn.com/w320/un.png`}
+                alt={player.team?.name || "Country Flag"}
+                className="w-full h-full object-cover border border-slate-800 rounded shadow-2xl"
+              />
+              <span className="absolute -bottom-2 -right-2 bg-slate-950 text-brand-green font-mono font-bold text-xs border border-slate-800 px-2 py-0.5 rounded-full shadow-lg">
                 #{player.jerseyNumber}
               </span>
             </div>

@@ -151,8 +151,8 @@ export default function FavoritesDashboard() {
                       </button>
 
                       <div className="space-y-2">
-                        <div className="w-10 h-10 rounded-full bg-brand-green/10 border border-brand-green/20 flex items-center justify-center text-sm font-bold text-brand-green">
-                          {p.name.charAt(0)}
+                        <div className="w-10 h-7 overflow-hidden rounded border border-slate-800 shadow">
+                          <img src={p.team?.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-full h-full object-cover" />
                         </div>
                         <div>
                           <h3 className="text-sm font-bold text-white group-hover:text-brand-green transition-colors">{p.name}</h3>
