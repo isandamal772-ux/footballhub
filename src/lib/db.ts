@@ -753,8 +753,8 @@ export const dbMock = {
       if (apiKey) {
         try {
           const dateFrom = new Date(Date.now() - 86400000 * 3).toISOString().split('T')[0]; // 3 days ago
-          const dateTo = new Date(Date.now() + 86400000 * 4).toISOString().split('T')[0];   // 4 days later
-          const res = await fetch(`https://api.football-data.org/v4/matches?dateFrom=${dateFrom}&dateTo=${dateTo}`, {
+          const dateTo = new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0];   // 3 days later
+          const res = await fetch(`https://api.football-data.org/v4/matches?dateFrom=${dateFrom}&dateTo=${dateTo}&competitions=WC,CL,BL1,DED,BSA,PD,FL1,ELC,PPL,EC,SA,PL`, {
             headers: { "X-Auth-Token": apiKey },
             next: { revalidate: 30 }
           });
