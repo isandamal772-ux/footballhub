@@ -40,7 +40,12 @@
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
+  background-image: linear-gradient(rgba(8, 12, 20, 0.94), rgba(8, 12, 20, 0.94)), url('https://images.unsplash.com/photo-1546587348-d12660c30c50?q=80&w=1920&auto=format&fit=crop');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
