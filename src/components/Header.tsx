@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, X, Search, Globe, Heart, Trophy, Activity, Users, User, GitCompare, Sparkles } from 'lucide-react';
+import { Menu, X, Search, Globe, Heart, Trophy, Activity, Users, User, GitCompare, Sparkles, TrendingUp, Award } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
 
 export default function Header() {
@@ -45,10 +45,9 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: t('live_scores'), icon: Activity },
-    { href: '/world-cup', label: t('world_cup'), icon: Trophy },
-    { href: '/teams', label: 'Teams', icon: Users },
-    { href: '/players', label: 'Players', icon: User },
-    { href: '/compare', label: t('compare'), icon: GitCompare },
+    { href: '/fifa-rankings', label: 'FIFA Rankings', icon: Trophy },
+    { href: '/predictions', label: 'Predictions', icon: TrendingUp },
+    { href: '/stadiums', label: 'Stadiums', icon: Award },
     { href: '/fan-zone', label: 'Fan Zone', icon: Sparkles },
   ];
 

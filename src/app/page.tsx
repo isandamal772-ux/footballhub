@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Activity, Trophy, TrendingUp, Sparkles, Filter, ChevronRight, MessageSquare, Heart, RefreshCw } from 'lucide-react';
+import { Activity, Trophy, TrendingUp, Sparkles, Filter, ChevronRight, MessageSquare, Heart, RefreshCw, Search } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MatchCard from '@/components/MatchCard';
@@ -439,6 +439,38 @@ export default function Home() {
                 ))}
               </div>
             </div>
+
+            {/* Trending Football Searches */}
+            <div className="glass-panel rounded-2xl p-6 space-y-4">
+              <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3 flex items-center gap-2">
+                <Search className="w-4 h-4 text-emerald-400" />
+                Trending Searches
+              </h3>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <Link href="/players/p1" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  🔥 Messi Profile
+                </Link>
+                <Link href="/players/p12" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  🔥 Mbappé Stats
+                </Link>
+                <Link href="/teams/team-arg" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  ⚽ Argentina Squad
+                </Link>
+                <Link href="/teams/team-por" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  ⚽ Portugal Roster
+                </Link>
+                <Link href="/fifa-rankings" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  🏆 FIFA Rankings
+                </Link>
+                <Link href="/predictions" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  📈 AI Match Predictions
+                </Link>
+                <Link href="/stadiums" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
+                  🏟️ Stadiums Directory
+                </Link>
+              </div>
+            </div>
+
           </div>
         </section>
         {/* FAQ & Information Section for Google SEO Authority */}

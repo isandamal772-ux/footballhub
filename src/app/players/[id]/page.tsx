@@ -15,6 +15,7 @@ export default function PlayerDetail() {
   const { favorites, toggleFavorite } = useApp();
 
   const [player, setPlayer] = useState<any>(null);
+  const [relatedPlayers, setRelatedPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,6 +28,12 @@ export default function PlayerDetail() {
           throw new Error("Player not found");
         }
         setPlayer(found);
+        
+        // Find 4 related players (same team or same position, excluding current)
+        const related = data
+          .filter((p: any) => p.id !== id && (p.teamId === found.teamId || p.position === found.position))
+          .slice(0, 4);
+        setRelatedPlayers(related);
       } catch (e) {
         console.error(e);
         router.push('/players');
@@ -197,7 +204,69 @@ export default function PlayerDetail() {
             </div>
           </section>
 
+          {/* Related Athletes Widget */}
+          {relatedPlayers.length > 0 && (
+            <section className="glass-panel rounded-3xl p-6 md:p-8 space-y-4 md:col-span-12 w-full mt-6">
+              <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3">
+                📋 Related Athletes
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {relatedPlayers.map((p) => (
+                  <Link
+                    key={p.id}
+                    href={`/players/${p.id}`}
+                    className="glass-panel rounded-2xl p-4 flex items-center justify-between group hover:border-brand-green/20 transition duration-300 bg-slate-950/20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-5.5 overflow-hidden rounded border border-slate-800 shadow-sm shrink-0">
+                        <img src={p.team?.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-full h-full object-cover" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white group-hover:text-brand-green transition-colors truncate max-w-[120px]">{p.name}</h4>
+                        <p className="text-[9px] text-slate-500 uppercase font-mono font-bold mt-0.5">{p.position}</p>
+                      </div>
+                    </div>
+                    <span className="text-[9px] bg-brand-green/10 text-brand-green font-mono font-bold px-2 py-0.5 rounded border border-brand-green/20">
+                      ★ {p.rating.toFixed(1)}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
         </div>
+
+        {/* Schema.org BreadcrumbList JSON-LD */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BreadcrumbList",
+              "itemListElement": [
+                {
+                  "@type": "ListItem",
+                  "position": 1,
+                  "name": "Home",
+                  "item": "https://footballhub.asia"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 2,
+                  "name": "Players",
+                  "item": "https://footballhub.asia/players"
+                },
+                {
+                  "@type": "ListItem",
+                  "position": 3,
+                  "name": player.name,
+                  "item": `https://footballhub.asia/players/${player.id}`
+                }
+              ]
+            })
+          }}
+        />
       </main>
 
       <Footer />

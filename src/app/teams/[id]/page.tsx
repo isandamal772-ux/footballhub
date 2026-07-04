@@ -15,6 +15,7 @@ export default function TeamDetail() {
   const { favorites, toggleFavorite } = useApp();
 
   const [team, setTeam] = useState<any>(null);
+  const [relatedTeams, setRelatedTeams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -27,6 +28,12 @@ export default function TeamDetail() {
           throw new Error("Team not found");
         }
         setTeam(found);
+        
+        // Find 4 related teams in the same group (excluding current)
+        const related = data
+          .filter((t: any) => t.id !== id && t.groupName === found.groupName)
+          .slice(0, 4);
+        setRelatedTeams(related);
       } catch (e) {
         console.error(e);
         router.push('/teams');
@@ -281,7 +288,67 @@ export default function TeamDetail() {
             </div>
           </div>
         </section>
+
+        {/* Related Squads / Group Rivals */}
+        {relatedTeams.length > 0 && (
+          <section className="glass-panel rounded-3xl p-6 md:p-8 space-y-4 w-full mt-6">
+            <h3 className="text-sm font-black text-white uppercase tracking-widest border-b border-slate-900 pb-3">
+              📋 Group Rivals & Related Squads
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {relatedTeams.map((t) => (
+                <Link
+                  key={t.id}
+                  href={`/teams/${t.id}`}
+                  className="glass-panel rounded-2xl p-4 flex items-center justify-between group hover:border-brand-green/20 transition duration-300 bg-slate-950/20"
+                >
+                  <div className="flex items-center gap-3">
+                    <img src={t.flagUrl || `https://flagcdn.com/w320/un.png`} alt="" className="w-8 h-5.5 object-cover rounded border border-slate-800 shadow-sm shrink-0" />
+                    <div>
+                      <h4 className="text-xs font-bold text-white group-hover:text-brand-green transition-colors truncate max-w-[120px]">{t.name}</h4>
+                      <p className="text-[9px] text-slate-500 font-mono font-bold mt-0.5">{t.groupName}</p>
+                    </div>
+                  </div>
+                  <span className="text-[9px] bg-slate-900 text-slate-300 font-mono font-bold px-2 py-0.5 border border-slate-850 rounded">
+                    Rank #{t.ranking}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
+
+      {/* Schema.org BreadcrumbList JSON-LD */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://footballhub.asia"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Teams",
+                "item": "https://footballhub.asia/teams"
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": team.name,
+                "item": `https://footballhub.asia/teams/${team.id}`
+              }
+            ]
+          })
+        }}
+      />
 
       <Footer />
     </div>
