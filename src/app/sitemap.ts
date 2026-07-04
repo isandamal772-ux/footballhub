@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes = [
     '',
     '/world-cup',
+    '/world-cup/groups',
     '/teams',
     '/players',
     '/compare',
