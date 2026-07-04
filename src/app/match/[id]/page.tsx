@@ -251,6 +251,42 @@ export default function MatchCenter() {
     <div className="flex flex-col min-h-screen">
       <title>{`${match.teamA?.name} vs ${match.teamB?.name} Live Score | World Football Hub`}</title>
       <meta name="description" content={`Follow the live match score, statistics, commentary timeline and lineups for ${match.teamA?.name} vs ${match.teamB?.name} at World Football Hub.`} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SportsEvent",
+            "name": `${match.teamA?.name} vs ${match.teamB?.name}`,
+            "startDate": match.datetime,
+            "location": {
+              "@type": "Place",
+              "name": match.venue
+            },
+            "competitor": [
+              {
+                "@type": "SportsTeam",
+                "name": match.teamA?.name,
+                "logo": match.teamA?.flagUrl
+              },
+              {
+                "@type": "SportsTeam",
+                "name": match.teamB?.name,
+                "logo": match.teamB?.flagUrl
+              }
+            ],
+            "sport": "Soccer",
+            "homeTeam": {
+              "@type": "SportsTeam",
+              "name": match.teamA?.name
+            },
+            "awayTeam": {
+              "@type": "SportsTeam",
+              "name": match.teamB?.name
+            }
+          })
+        }}
+      />
       <Header />
 
       <main className="flex-grow max-w-4xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 space-y-6">

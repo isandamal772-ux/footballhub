@@ -102,6 +102,67 @@ export default function Home() {
       <Header />
       {heroMatch && <StructuredData type="SportsEvent" data={sportsSchema} />}
 
+      {/* Google SEO WebSite, Organization, and FAQ Page schemas */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "World Football Hub",
+              "url": "https://footballhub.asia",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://footballhub.asia/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              }
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "SportsOrganization",
+              "name": "World Football Hub",
+              "url": "https://footballhub.asia",
+              "logo": "https://footballhub.asia/logo.png",
+              "sameAs": [
+                "https://facebook.com/worldfootballhub",
+                "https://twitter.com/worldfootballhub"
+              ]
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": [
+                {
+                  "@type": "Question",
+                  "name": "What is World Football Hub?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "World Football Hub is a premium sports directory providing real-time live scores, match schedules, tournament brackets, and player profiles for football leagues around the world."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "Can I watch football matches live here?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, you can connect live stream links such as YouTube stream URLs, Twitch, or direct HLS feeds to watch live broadcasts inside our Match Center."
+                  }
+                },
+                {
+                  "@type": "Question",
+                  "name": "How often are the match scores updated?",
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Match scores are updated in real-time, fetching data live from leading sports APIs or simulating detailed matches every 5 seconds."
+                  }
+                }
+              ]
+            }
+          ])
+        }}
+      />
+
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-12">
         
         {/* HERO SECTION: FEATURED MATCH */}
@@ -376,6 +437,50 @@ export default function Home() {
                     </div>
                   </Link>
                 ))}
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* FAQ & Information Section for Google SEO Authority */}
+        <section className="glass-panel rounded-3xl p-8 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950/60 border-t border-brand-green/20 space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <span className="bg-brand-green/10 text-brand-green border border-brand-green/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+              Knowledge Base
+            </span>
+            <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">Frequently Asked Questions</h2>
+            <p className="text-slate-400 text-xs">Find answers to the most common inquiries regarding World Football Hub rankings, data feeds, and streaming capabilities.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto pt-4">
+            <div className="space-y-3">
+              <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl space-y-2">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wide text-brand-green">What is World Football Hub?</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  World Football Hub is a premium sports directory providing real-time live scores, match schedules, tournament brackets, and player profiles for football leagues around the world.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl space-y-2">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wide text-brand-green">How are the player ratings calculated?</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Player ratings are computed using a proprietary data-normalization index that combines live match caps, goal ratios, assist counts, and player valuations.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl space-y-2">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wide text-brand-green">How can I watch live matches?</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Navigate to the Match Center page of any active match, select the Live Stream tab, and input any custom YouTube stream URL, Twitch broadcast, or direct HLS feed.
+                </p>
+              </div>
+
+              <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl space-y-2">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wide text-brand-green">Can I track completed matches?</h4>
+                <p className="text-slate-400 text-xs leading-relaxed">
+                  Yes, select the Finished filter from the home screen feed to view comprehensive match stats, goalscorers, timelines, and next scheduled fixtures for both competing squads.
+                </p>
               </div>
             </div>
           </div>
