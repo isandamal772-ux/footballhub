@@ -26,14 +26,17 @@ export default function MatchCenter() {
 
   const isFavorite = favorites.matches.includes(id);
 
-  const [streamUrl, setStreamUrl] = useState<string>("");
-  const [activeServer, setActiveServer] = useState<'PRESET' | 'CUSTOM'>('PRESET');
+  const [streamUrl, setStreamUrl] = useState<string>("https://link.me/fifaworldcup");
+  const [activeServer, setActiveServer] = useState<'PRESET' | 'CUSTOM'>('CUSTOM');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem(`match-stream-${id}`);
       if (saved) {
         setStreamUrl(saved);
+        setActiveServer('CUSTOM');
+      } else {
+        setStreamUrl("https://link.me/fifaworldcup");
         setActiveServer('CUSTOM');
       }
     }
@@ -47,12 +50,13 @@ export default function MatchCenter() {
         setActiveServer('CUSTOM');
       } else {
         localStorage.removeItem(`match-stream-${id}`);
-        setActiveServer('PRESET');
+        setStreamUrl("https://link.me/fifaworldcup");
+        setActiveServer('CUSTOM');
       }
     }
   };
 
-  const [highlightsUrl, setHighlightsUrl] = useState<string>("");
+  const [highlightsUrl, setHighlightsUrl] = useState<string>("https://link.me/fifaworldcup");
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -62,6 +66,8 @@ export default function MatchCenter() {
       } else if (id === 'match-2' || id === 'api-match-438179') {
         // Fallback default highlights video for yesterday's matches
         setHighlightsUrl("https://www.youtube.com/watch?v=F3_6K24QZ_c");
+      } else {
+        setHighlightsUrl("https://link.me/fifaworldcup");
       }
     }
   }, [id]);
@@ -73,6 +79,7 @@ export default function MatchCenter() {
         localStorage.setItem(`match-highlights-${id}`, url);
       } else {
         localStorage.removeItem(`match-highlights-${id}`);
+        setHighlightsUrl("https://link.me/fifaworldcup");
       }
     }
   };
@@ -626,6 +633,25 @@ export default function MatchCenter() {
                           ></iframe>
                         );
                       }
+                      if (streamUrl.includes('link.me') || streamUrl.includes('fifaworldcup') || !streamUrl.match(/\.(mp4|m3u8|webm|ogg)/i)) {
+                        return (
+                          <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-4 bg-slate-950/90 border border-slate-900/60 rounded-2xl">
+                            <span className="text-4xl animate-bounce">📺</span>
+                            <h4 className="font-bold text-white text-sm">External Broadcast Stream Connected</h4>
+                            <p className="text-slate-400 text-[11px] max-w-sm">
+                              This stream is hosted externally on link.me. Click the button below to watch the live match broadcast!
+                            </p>
+                            <a
+                              href={streamUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 bg-brand-green hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-wider transition shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                            >
+                              Open Live Match Broadcast 🚀
+                            </a>
+                          </div>
+                        );
+                      }
                       return (
                         <video
                           src={streamUrl}
@@ -863,6 +889,25 @@ export default function MatchCenter() {
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
                         ></iframe>
+                      );
+                    }
+                    if (highlightsUrl.includes('link.me') || highlightsUrl.includes('fifaworldcup') || !highlightsUrl.match(/\.(mp4|m3u8|webm|ogg)/i)) {
+                      return (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 space-y-4 bg-slate-950/90 border border-slate-900/60 rounded-2xl">
+                          <span className="text-4xl animate-pulse">🎬</span>
+                          <h4 className="font-bold text-white text-sm">External Highlights Stream Connected</h4>
+                          <p className="text-slate-400 text-[11px] max-w-sm">
+                            This highlights reel is hosted externally on link.me. Click the button below to watch the match highlights video!
+                          </p>
+                          <a
+                            href={highlightsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 bg-brand-green hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-[10px] uppercase tracking-wider transition shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                          >
+                            Open Match Highlights 🚀
+                          </a>
+                        </div>
                       );
                     }
                     return (
