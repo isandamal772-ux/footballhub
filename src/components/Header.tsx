@@ -47,7 +47,6 @@ export default function Header() {
     { href: '/', label: t('live_scores'), icon: Activity },
     { href: '/fifa-rankings', label: 'FIFA Rankings', icon: Trophy },
     { href: '/predictions', label: 'Predictions', icon: TrendingUp },
-    { href: '/stadiums', label: 'Stadiums', icon: Award },
     { href: '/fan-zone', label: 'Fan Zone', icon: Sparkles },
   ];
 

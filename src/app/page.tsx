@@ -465,9 +465,6 @@ export default function Home() {
                 <Link href="/predictions" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
                   📈 AI Match Predictions
                 </Link>
-                <Link href="/stadiums" className="bg-slate-900 hover:bg-brand-green hover:text-slate-950 text-slate-300 font-semibold px-2.5 py-1.5 rounded-lg text-[10px] transition">
-                  🏟️ Stadiums Directory
-                </Link>
               </div>
             </div>
 
