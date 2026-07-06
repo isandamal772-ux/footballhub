@@ -18,11 +18,90 @@ export default function MatchCenter() {
   const [match, setMatch] = useState<any>(null);
   const [nextMatchA, setNextMatchA] = useState<any>(null);
   const [nextMatchB, setNextMatchB] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'STREAM' | 'STATS' | 'LINEUPS' | 'PREDICTIONS' | 'HIGHLIGHTS'>('OVERVIEW');
+  const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'STREAM' | 'STATS' | 'LINEUPS' | 'PREDICTIONS' | 'HIGHLIGHTS' | 'H2H' | 'FAN_CHAT'>('OVERVIEW');
   const [predictionSubmitted, setPredictionSubmitted] = useState(false);
   const [predictionChoice, setPredictionChoice] = useState<string | null>(null);
   const [predictionsCounts, setPredictionsCounts] = useState({ WinA: 55, Draw: 20, WinB: 25 });
   const [loading, setLoading] = useState(true);
+
+  // Sound Alerts & Fan Chat states
+  const [goalAlertsEnabled, setGoalAlertsEnabled] = useState(true);
+  const prevScoreRef = useRef<{ a: number; b: number } | null>(null);
+  const [chatNickname, setChatNickname] = useState('');
+  const [chatText, setChatText] = useState('');
+  const [chatMessages, setChatMessages] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (match?.id) {
+      setChatMessages([
+        { user: "Diego_99", flag: "🇦🇷", text: `Vamos! Best of luck to the boys today!`, time: "10 mins ago" },
+        { user: "KylianFanClub", flag: "🇫🇷", text: "Allez Les Bleus! Easy win coming up.", time: "7 mins ago" },
+        { user: "TacticalGamer", flag: "🇬🇧", text: "Exciting tactical setup. Hoping for a high scoring game!", time: "2 mins ago" }
+      ]);
+    }
+  }, [match?.id]);
+
+  const handlePostChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatNickname.trim() || !chatText.trim()) return;
+    const newMessage = {
+      user: chatNickname.trim(),
+      flag: "💬",
+      text: chatText.trim(),
+      time: "Just now"
+    };
+    setChatMessages(prev => [...prev, newMessage]);
+    setChatText('');
+  };
+
+  const playGoalAlertSound = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      // Whistle sound
+      const osc = ctx.createOscillator();
+      const oscGain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1000, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.15);
+      oscGain.gain.setValueAtTime(0.2, ctx.currentTime);
+      oscGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      
+      osc.connect(oscGain);
+      oscGain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+
+      // Cheer sound
+      const bufferSize = ctx.sampleRate * 1.5;
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(450, ctx.currentTime);
+      filter.Q.setValueAtTime(1.2, ctx.currentTime);
+      
+      const noiseGain = ctx.createGain();
+      noiseGain.gain.setValueAtTime(0.3, ctx.currentTime);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 1.2);
+      
+      noise.connect(filter);
+      filter.connect(noiseGain);
+      noiseGain.connect(ctx.destination);
+      
+      noise.start();
+    } catch (e) {
+      console.error("Audio Synthesis Error:", e);
+    }
+  };
 
   const isFavorite = favorites.matches.includes(id);
 
@@ -142,6 +221,17 @@ export default function MatchCenter() {
         throw new Error("Match not found");
       }
       const data = await detailRes.json();
+      
+      // Goal alert sound check on score change
+      if (data && prevScoreRef.current) {
+        if (data.teamAScore > prevScoreRef.current.a || data.teamBScore > prevScoreRef.current.b) {
+          if (goalAlertsEnabled) {
+            playGoalAlertSound();
+          }
+        }
+      }
+      prevScoreRef.current = { a: data.teamAScore ?? 0, b: data.teamBScore ?? 0 };
+      
       setMatch(data);
 
       const allMatches = await listRes.json();
@@ -426,7 +516,7 @@ export default function MatchCenter() {
 
         {/* TAB BAR HEADER */}
         <div className="flex border-b border-slate-900 text-sm overflow-x-auto no-scrollbar">
-          {(['OVERVIEW', 'STREAM', 'HIGHLIGHTS', 'STATS', 'LINEUPS', 'PREDICTIONS'] as const).map((tab) => (
+          {(['OVERVIEW', 'STREAM', 'HIGHLIGHTS', 'STATS', 'LINEUPS', 'PREDICTIONS', 'H2H', 'FAN_CHAT'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -442,6 +532,8 @@ export default function MatchCenter() {
               {tab === 'STATS' && 'Match Statistics'}
               {tab === 'LINEUPS' && 'Lineups / Formations'}
               {tab === 'PREDICTIONS' && 'Fan Predictions'}
+              {tab === 'H2H' && '🤝 H2H Form'}
+              {tab === 'FAN_CHAT' && '💬 Fan Live Chat'}
             </button>
           ))}
         </div>
@@ -483,25 +575,37 @@ export default function MatchCenter() {
                     <MessageSquare className="w-4 h-4 text-emerald-400" />
                     Live Commentary Stream
                   </span>
-                  <button
-                    onClick={() => {
-                      const nextState = !autoVoiceEnabled;
-                      setAutoVoiceEnabled(nextState);
-                      if (nextState && commentary.length > 0) {
-                        speakText("Audio commentary enabled. " + commentary[0].text);
-                        lastSpokenTextRef.current = commentary[0].text;
-                      } else {
-                        if (typeof window !== 'undefined') window.speechSynthesis.cancel();
-                      }
-                    }}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all duration-300 ${
-                      autoVoiceEnabled
-                        ? 'bg-amber-400 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.3)] animate-pulse'
-                        : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {autoVoiceEnabled ? '🔊 Audio ON' : '🔇 Audio OFF'}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setGoalAlertsEnabled(!goalAlertsEnabled)}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all duration-300 ${
+                        goalAlertsEnabled
+                          ? 'bg-emerald-400 text-slate-950 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {goalAlertsEnabled ? '🔔 Goal Sound ON' : '🔕 Goal Sound OFF'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const nextState = !autoVoiceEnabled;
+                        setAutoVoiceEnabled(nextState);
+                        if (nextState && commentary.length > 0) {
+                          speakText("Audio commentary enabled. " + commentary[0].text);
+                          lastSpokenTextRef.current = commentary[0].text;
+                        } else {
+                          if (typeof window !== 'undefined') window.speechSynthesis.cancel();
+                        }
+                      }}
+                      className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[9px] sm:text-[10px] font-black uppercase transition-all duration-300 ${
+                        autoVoiceEnabled
+                          ? 'bg-amber-400 text-slate-950 shadow-[0_0_12px_rgba(251,191,36,0.3)] animate-pulse'
+                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {autoVoiceEnabled ? '🔊 Audio ON' : '🔇 Audio OFF'}
+                    </button>
+                  </div>
                 </h3>
 
                 <div className="space-y-4 max-h-[30rem] overflow-y-auto pr-2">
@@ -1224,6 +1328,145 @@ export default function MatchCenter() {
                   </button>
                 </form>
               )}
+            </div>
+          )}
+
+          {/* TAB 5: H2H COMPARISON */}
+          {activeTab === 'H2H' && (
+            <div className="space-y-8 max-w-4xl mx-auto animate-fade-in">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* H2H Summary Bar */}
+                <div className="glass-panel p-6 rounded-2xl space-y-4 md:col-span-3 text-center bg-slate-950/40 border border-slate-900">
+                  <h4 className="text-xs font-black uppercase text-emerald-400 tracking-wider">H2H History Summary</h4>
+                  <div className="flex justify-around items-center pt-2">
+                    <div>
+                      <div className="text-3xl font-black text-white font-mono">12</div>
+                      <div className="text-[10px] text-slate-450 font-bold uppercase mt-1">{match?.teamA?.name} Wins</div>
+                    </div>
+                    <div className="border-l border-slate-900 h-10"></div>
+                    <div>
+                      <div className="text-3xl font-black text-slate-400 font-mono">8</div>
+                      <div className="text-[10px] text-slate-450 font-bold uppercase mt-1">Draws</div>
+                    </div>
+                    <div className="border-l border-slate-900 h-10"></div>
+                    <div>
+                      <div className="text-3xl font-black text-white font-mono">9</div>
+                      <div className="text-[10px] text-slate-450 font-bold uppercase mt-1">{match?.teamB?.name} Wins</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team A Recent Matches */}
+                <div className="glass-panel p-5 rounded-2xl space-y-4 bg-slate-950/20 border border-slate-900">
+                  <h4 className="text-xs font-black uppercase text-white tracking-wider border-b border-slate-900/60 pb-2.5 flex items-center gap-2">
+                    <img src={match?.teamA?.flagUrl} alt="" className="w-5 h-3.5 object-cover rounded-sm border border-slate-800" />
+                    <span>{match?.teamA?.name} Recent Form</span>
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs Brazil</span>
+                      <span className="font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-black border border-emerald-500/20">2 - 1 W</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs Uruguay</span>
+                      <span className="font-mono bg-amber-500/10 text-amber-400 px-2 py-0.5 rounded font-black border border-amber-500/20">1 - 1 D</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs Chile</span>
+                      <span className="font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-black border border-emerald-500/20">3 - 0 W</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Probability Meter */}
+                <div className="glass-panel p-5 rounded-2xl space-y-4 bg-slate-950/20 border border-slate-900 flex flex-col justify-center items-center">
+                  <h4 className="text-xs font-black uppercase text-slate-400 tracking-wider">Win Probability</h4>
+                  <div className="relative w-28 h-28 flex items-center justify-center mt-2">
+                    <div className="absolute inset-0 rounded-full border-[8px] border-emerald-950"></div>
+                    <div className="absolute inset-0 rounded-full border-[8px] border-l-brand-green border-t-brand-green border-r-transparent border-b-transparent rotate-45 animate-pulse"></div>
+                    <div className="text-center z-10">
+                      <span className="text-2xl font-black text-white font-mono">58%</span>
+                      <span className="text-[9px] text-slate-455 block font-bold uppercase mt-0.5">{match?.teamA?.name} Adv</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Team B Recent Matches */}
+                <div className="glass-panel p-5 rounded-2xl space-y-4 bg-slate-950/20 border border-slate-900">
+                  <h4 className="text-xs font-black uppercase text-white tracking-wider border-b border-slate-900/60 pb-2.5 flex items-center gap-2">
+                    <img src={match?.teamB?.flagUrl} alt="" className="w-5 h-3.5 object-cover rounded-sm border border-slate-800" />
+                    <span>{match?.teamB?.name} Recent Form</span>
+                  </h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs England</span>
+                      <span className="font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-black border border-emerald-500/20">2 - 0 W</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs Italy</span>
+                      <span className="font-mono bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded font-black border border-rose-500/20">1 - 2 L</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs bg-slate-900/40 p-3 rounded-xl border border-slate-900/50">
+                      <span className="font-semibold text-slate-300">vs Belgium</span>
+                      <span className="font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-black border border-emerald-500/20">3 - 2 W</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: FAN LIVE CHAT */}
+          {activeTab === 'FAN_CHAT' && (
+            <div className="max-w-2xl mx-auto glass-panel p-6 rounded-2xl space-y-6 border border-slate-900 bg-slate-950/30 animate-fade-in">
+              <div className="border-b border-slate-900 pb-3">
+                <h3 className="text-sm font-black text-white uppercase tracking-wider flex items-center gap-2">
+                  <span>💬 Fan Live Match Chat</span>
+                  <span className="bg-brand-green/15 text-brand-green border border-brand-green/20 px-2 py-0.5 rounded-full text-[9px] uppercase font-bold animate-pulse">LIVE Room</span>
+                </h3>
+              </div>
+
+              {/* Chat Message balloon stream */}
+              <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
+                {chatMessages.map((msg, idx) => (
+                  <div key={idx} className="flex flex-col gap-1 text-xs">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-slate-450">{msg.flag}</span>
+                      <span className="font-black text-emerald-400">{msg.user}</span>
+                      <span className="text-[9px] text-slate-650 font-semibold">{msg.time}</span>
+                    </div>
+                    <p className="bg-slate-900/50 border border-slate-900/60 p-3 rounded-2xl rounded-tl-none text-slate-200 leading-relaxed max-w-xl">
+                      {msg.text}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Comment submission form */}
+              <form onSubmit={handlePostChat} className="grid grid-cols-1 sm:grid-cols-4 gap-3 border-t border-slate-900 pt-4">
+                <input
+                  type="text"
+                  placeholder="Your Nickname"
+                  value={chatNickname}
+                  onChange={(e) => setChatNickname(e.target.value)}
+                  required
+                  className="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-green focus:ring-1 focus:ring-brand-green/30 outline-none"
+                />
+                <input
+                  type="text"
+                  placeholder="Share your thoughts on the match..."
+                  value={chatText}
+                  onChange={(e) => setChatText(e.target.value)}
+                  required
+                  className="sm:col-span-2 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-600 focus:border-brand-green focus:ring-1 focus:ring-brand-green/30 outline-none"
+                />
+                <button
+                  type="submit"
+                  className="bg-brand-green hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition"
+                >
+                  Send Comment
+                </button>
+              </form>
             </div>
           )}
         </section>
