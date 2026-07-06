@@ -674,7 +674,85 @@ function simulateLiveMatches() {
         });
       }
     });
-  }, 10000); // ticks every 10 seconds (1 simulated minute per tick)
+
+    // 1. Maintain at least 2 active LIVE matches
+    const liveMatches = mockStore.matches.filter(m => m.status === "LIVE");
+    if (liveMatches.length < 2) {
+      const needed = 2 - liveMatches.length;
+      for (let i = 0; i < needed; i++) {
+        const idxA = Math.floor(Math.random() * mockStore.teams.length);
+        let idxB = Math.floor(Math.random() * mockStore.teams.length);
+        if (idxA === idxB) idxB = (idxB + 1) % mockStore.teams.length;
+        const tA = mockStore.teams[idxA];
+        const tB = mockStore.teams[idxB];
+
+        const matchId = `match-auto-live-${Math.random().toString(36).substr(2, 5)}`;
+        mockStore.matches.unshift({
+          id: matchId,
+          teamAId: tA.id,
+          teamBId: tB.id,
+          teamAScore: 0,
+          teamBScore: 0,
+          status: "LIVE",
+          timeElapsed: Math.floor(Math.random() * 30), // Start at a random minute to feel natural
+          datetime: new Date(),
+          venue: "International Arena",
+          stage: "Global Friendly Cup",
+          groupName: "Friendly",
+          stats: JSON.stringify({
+            possession: { teamA: 50, teamB: 50 },
+            shots: { teamA: 0, teamB: 0 },
+            shotsOnTarget: { teamA: 0, teamB: 0 },
+            fouls: { teamA: 0, teamB: 0 },
+            yellowCards: { teamA: 0, teamB: 0 },
+            redCards: { teamA: 0, teamB: 0 },
+            corners: { teamA: 0, teamB: 0 }
+          }),
+          events: JSON.stringify([]),
+          commentary: JSON.stringify([
+            { time: 0, text: `Kickoff! The match between ${tA.name} and ${tB.name} has officially begun.` }
+          ]),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+    }
+
+    // 2. Maintain at least 3 active SCHEDULED matches
+    const scheduledMatches = mockStore.matches.filter(m => m.status === "SCHEDULED");
+    if (scheduledMatches.length < 3) {
+      const needed = 3 - scheduledMatches.length;
+      for (let i = 0; i < needed; i++) {
+        const idxA = Math.floor(Math.random() * mockStore.teams.length);
+        let idxB = Math.floor(Math.random() * mockStore.teams.length);
+        if (idxA === idxB) idxB = (idxB + 1) % mockStore.teams.length;
+        const tA = mockStore.teams[idxA];
+        const tB = mockStore.teams[idxB];
+
+        const delayMs = (5 + Math.random() * 115) * 60 * 1000;
+        const kickoffTime = new Date(Date.now() + delayMs);
+
+        mockStore.matches.push({
+          id: `match-auto-sched-${Math.random().toString(36).substr(2, 5)}`,
+          teamAId: tA.id,
+          teamBId: tB.id,
+          teamAScore: 0,
+          teamBScore: 0,
+          status: "SCHEDULED",
+          timeElapsed: 0,
+          datetime: kickoffTime,
+          venue: "International Arena",
+          stage: "Global Friendly Cup",
+          groupName: "Friendly",
+          stats: JSON.stringify({}),
+          events: JSON.stringify([]),
+          commentary: JSON.stringify([]),
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+      }
+    }
+  }, 10000); // ticks every 10 seconds
 }
 
 // Mock Query Functions mimicking Prisma Client queries
