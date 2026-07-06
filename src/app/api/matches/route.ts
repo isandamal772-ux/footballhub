@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { cache } from '@/lib/redis';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     // Cache the matches list for 5 seconds to reduce database strain

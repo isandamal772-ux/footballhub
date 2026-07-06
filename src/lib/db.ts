@@ -517,159 +517,164 @@ const mockStore: MockDataStore = {
   favorites: []
 };
 
-// Auto-updating live match simulation loop state
-const getLiveMatchState = () => {
-  const now = Date.now();
-  const blockMs = 90 * 60 * 1000;
-  const currentBlock = Math.floor(now / blockMs);
-  const timeElapsed = Math.floor((now % blockMs) / (60 * 1000));
-
-  const totalTeams = mockStore.teams.length || 1;
-  const idxA = (currentBlock * 3) % totalTeams;
-  let idxB = (currentBlock * 3 + 1) % totalTeams;
-  if (idxA === idxB) idxB = (idxB + 1) % totalTeams;
-
-  const tA = mockStore.teams[idxA];
-  const tB = mockStore.teams[idxB];
-
-  // Get superstar or seeded players of team A and team B for event assignments
-  const playersA = mockStore.players.filter(p => p.teamId === tA.id);
-  const playersB = mockStore.players.filter(p => p.teamId === tB.id);
-
-  // Deterministic event minutes
-  const eventTimes = [12, 28, 45, 62, 78, 88];
-  const events: any[] = [];
-  const commentary: any[] = [];
-  let scoreA = 0;
-  let scoreB = 0;
-
-  commentary.push({
-    time: 0,
-    text: `Kickoff! The match between ${tA.name} and ${tB.name} has officially begun at Lusail Stadium.`
-  });
-
-  // Seeded deterministic random number generator
-  const seed = currentBlock;
-  const isGoal = (minute: number) => {
-    const r = Math.sin(seed + minute) * 10000;
-    return (r - Math.floor(r)) < 0.28; // 28% chance of goal
-  };
-  const isCard = (minute: number) => {
-    const r = Math.sin(seed + minute + 3) * 10000;
-    return (r - Math.floor(r)) < 0.22; // 22% chance of card
-  };
-
-  eventTimes.forEach(minute => {
-    if (minute <= timeElapsed) {
-      if (isGoal(minute)) {
-        const teamAScores = (Math.sin(seed + minute + 5) * 10000 % 2) > 0;
-        if (teamAScores) {
-          scoreA++;
-          const scorer = playersA[minute % (playersA.length || 1)]?.name || "Striker";
-          events.push({
-            time: minute,
-            type: "GOAL",
-            team: tA.code,
-            player: scorer,
-            detail: "Superb clinical finish past the diving keeper."
-          });
-          commentary.unshift({
-            time: minute,
-            text: `GOAL! ${scorer} scores for ${tA.name}! The crowd goes wild.`
-          });
-        } else {
-          scoreB++;
-          const scorer = playersB[minute % (playersB.length || 1)]?.name || "Forward";
-          events.push({
-            time: minute,
-            type: "GOAL",
-            team: tB.code,
-            player: scorer,
-            detail: "Powerful header direct from a corner kick."
-          });
-          commentary.unshift({
-            time: minute,
-            text: `GOAL! ${scorer} scores for ${tB.name}! A beautiful tactical setup.`
-          });
-        }
-      } else if (isCard(minute)) {
-        const teamACard = (Math.sin(seed + minute + 8) * 10000 % 2) > 0;
-        const culprit = teamACard 
-          ? (playersA[(minute + 2) % (playersA.length || 1)]?.name || "Defender")
-          : (playersB[(minute + 2) % (playersB.length || 1)]?.name || "Midfielder");
-        
-        events.push({
-          time: minute,
-          type: "CARD",
-          team: teamACard ? tA.code : tB.code,
-          player: culprit,
-          detail: "Yellow card for a sliding tackle."
-        });
-        commentary.unshift({
-          time: minute,
-          text: `YELLOW CARD! Caution shown to ${culprit} for an intentional trip.`
-        });
-      }
-    }
-  });
-
-  return {
-    id: `match-live-${currentBlock}`,
-    teamAId: tA.id,
-    teamBId: tB.id,
-    teamAScore: scoreA,
-    teamBScore: scoreB,
-    status: timeElapsed >= 90 ? "FT" : "LIVE",
-    timeElapsed: Math.min(timeElapsed, 90),
-    datetime: new Date(now - (timeElapsed * 60 * 1000)),
-    venue: "Lusail Stadium, Lusail",
-    stage: "Group Stage",
-    groupName: tA.groupName || "Group A",
-    stats: JSON.stringify({
-      possession: { teamA: 50 + Math.floor(Math.sin(seed) * 8), teamB: 50 - Math.floor(Math.sin(seed) * 8) },
-      shots: { teamA: 5 + Math.floor(timeElapsed / 10), teamB: 4 + Math.floor(timeElapsed / 12) },
-      shotsOnTarget: { teamA: 2 + Math.floor(timeElapsed / 20), teamB: 2 + Math.floor(timeElapsed / 22) },
-      fouls: { teamA: 4 + Math.floor(timeElapsed / 15), teamB: 5 + Math.floor(timeElapsed / 14) },
-      yellowCards: { teamA: 1, teamB: 1 },
-      redCards: { teamA: 0, teamB: 0 },
-      corners: { teamA: 2 + Math.floor(timeElapsed / 25), teamB: 2 + Math.floor(timeElapsed / 28) }
-    }),
-    events: JSON.stringify(events),
-    commentary: JSON.stringify(commentary),
-    createdAt: new Date(),
-    updatedAt: new Date()
-  };
+// Background Live Simulation Engine
+const commentaryTemplates = {
+  GOAL: [
+    "GOAL! What an extraordinary strike from distance! The keeper had absolutely no chance.",
+    "GOAL! A towering header from the corner kick finds the back of the net!",
+    "GOAL! A neat tap-in after a brilliant low cross from the right flank.",
+    "GOAL! Penalty converted! Cool as you like, sending the goalkeeper the wrong way.",
+    "GOAL! An absolute defensive disaster leads to an easy tap-in!"
+  ],
+  CARD: [
+    "YELLOW CARD! Tactical foul to stop a dangerous counter-attack.",
+    "YELLOW CARD! High-boot challenge in the midfield circle.",
+    "YELLOW CARD! Caution shown for constant dissent towards the official.",
+    "YELLOW CARD! Late sliding challenge that caught the opponent's ankle."
+  ],
+  EVENT: [
+    "Foul committed in the center circle. Free kick awarded.",
+    "Corner kick floated into the box, cleared away by the central defender.",
+    "Shot wide! A powerful attempt from outside the box goes high and wide.",
+    "Offside! The assistant referee raises the flag to stop the play.",
+    "A quick counter-attack by the hosts, but the final pass is intercepted.",
+    "The referee calls for a brief water break. Tactical discussions ongoing on the touchline."
+  ]
 };
 
-let lastSimulationTime = Date.now();
+const getRandomItem = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
 function simulateLiveMatches() {
-  const liveState = getLiveMatchState();
-  const existingLiveIndex = mockStore.matches.findIndex(m => m.id.startsWith("match-live-") || m.id === "match-1");
+  // Ensure background simulation ticker runs exactly once
+  const globalForSimulator = global as unknown as { simulatorRunning: boolean };
+  if (globalForSimulator.simulatorRunning) return;
+  globalForSimulator.simulatorRunning = true;
 
-  if (existingLiveIndex !== -1) {
-    const oldMatch = mockStore.matches[existingLiveIndex];
-    if (oldMatch.id !== liveState.id) {
-      // Set the previous live match to FT
-      oldMatch.status = "FT";
-      oldMatch.timeElapsed = 90;
-      mockStore.matches.unshift(liveState);
-    } else {
-      mockStore.matches[existingLiveIndex] = {
-        ...oldMatch,
-        timeElapsed: liveState.timeElapsed,
-        teamAScore: liveState.teamAScore,
-        teamBScore: liveState.teamBScore,
-        stats: liveState.stats,
-        events: liveState.events,
-        commentary: liveState.commentary,
-        status: liveState.status,
-        updatedAt: new Date()
-      };
-    }
-  } else {
-    mockStore.matches.unshift(liveState);
-  }
+  // Let's start the background ticking loop
+  setInterval(() => {
+    mockStore.matches.forEach((m) => {
+      if (m.status === "LIVE") {
+        // Increment time elapsed by 1 minute
+        m.timeElapsed = (m.timeElapsed || 0) + 1;
+        m.updatedAt = new Date();
+
+        // Parse structures
+        let stats = { possession: { teamA: 50, teamB: 50 }, shots: { teamA: 0, teamB: 0 }, shotsOnTarget: { teamA: 0, teamB: 0 }, fouls: { teamA: 0, teamB: 0 }, yellowCards: { teamA: 0, teamB: 0 }, redCards: { teamA: 0, teamB: 0 }, corners: { teamA: 0, teamB: 0 } };
+        let events: any[] = [];
+        let commentary: any[] = [];
+
+        try { if (m.stats) stats = JSON.parse(m.stats); } catch (e) {}
+        try { if (m.events) events = JSON.parse(m.events); } catch (e) {}
+        try { if (m.commentary) commentary = JSON.parse(m.commentary); } catch (e) {}
+
+        // Increment stats slightly
+        stats.possession.teamA = 50 + Math.floor(Math.sin(m.timeElapsed / 5) * 6);
+        stats.possession.teamB = 100 - stats.possession.teamA;
+        if (Math.random() > 0.8) stats.shots.teamA += 1;
+        if (Math.random() > 0.8) stats.shots.teamB += 1;
+        if (Math.random() > 0.9) stats.shotsOnTarget.teamA += 1;
+        if (Math.random() > 0.9) stats.shotsOnTarget.teamB += 1;
+        if (Math.random() > 0.75) stats.fouls.teamA += 1;
+        if (Math.random() > 0.75) stats.fouls.teamB += 1;
+        if (Math.random() > 0.85) stats.corners.teamA += 1;
+        if (Math.random() > 0.85) stats.corners.teamB += 1;
+
+        // Roll for event occurrence
+        const roll = Math.random();
+        if (roll > 0.97) {
+          // GOAL
+          const teamAScores = Math.random() > 0.5;
+          const scorer = teamAScores 
+            ? (mockStore.players.filter(p => p.teamId === m.teamAId)[Math.floor(Math.random() * 5)]?.name || "Striker")
+            : (mockStore.players.filter(p => p.teamId === m.teamBId)[Math.floor(Math.random() * 5)]?.name || "Forward");
+          
+          if (teamAScores) {
+            m.teamAScore++;
+            stats.shotsOnTarget.teamA++;
+            stats.shots.teamA++;
+          } else {
+            m.teamBScore++;
+            stats.shotsOnTarget.teamB++;
+            stats.shots.teamB++;
+          }
+          
+          events.push({
+            time: m.timeElapsed,
+            type: "GOAL",
+            team: teamAScores ? "HOME" : "AWAY",
+            player: scorer,
+            detail: teamAScores ? `Clinical strike for ${scorer}!` : `Powerful header for ${scorer}!`
+          });
+
+          commentary.unshift({
+            time: m.timeElapsed,
+            text: getRandomItem(commentaryTemplates.GOAL).replace("GOAL!", `GOAL for ${teamAScores ? 'Home Team' : 'Away Team'}! (${scorer})`)
+          });
+        } else if (roll > 0.94) {
+          // CARD
+          const teamACard = Math.random() > 0.5;
+          const culprit = teamACard 
+            ? (mockStore.players.filter(p => p.teamId === m.teamAId)[Math.floor(Math.random() * 5)]?.name || "Defender")
+            : (mockStore.players.filter(p => p.teamId === m.teamBId)[Math.floor(Math.random() * 5)]?.name || "Midfielder");
+          
+          if (teamACard) stats.yellowCards.teamA++; else stats.yellowCards.teamB++;
+
+          events.push({
+            time: m.timeElapsed,
+            type: "CARD",
+            team: teamACard ? "HOME" : "AWAY",
+            player: culprit,
+            detail: "Yellow card caution for a late sliding tackle."
+          });
+
+          commentary.unshift({
+            time: m.timeElapsed,
+            text: getRandomItem(commentaryTemplates.CARD).replace("Caution shown", `Caution shown to ${culprit}`)
+          });
+        } else if (roll > 0.82) {
+          // General text commentary event
+          commentary.unshift({
+            time: m.timeElapsed,
+            text: getRandomItem(commentaryTemplates.EVENT)
+          });
+        }
+
+        // Set finished if reaches 90
+        if (m.timeElapsed >= 90) {
+          m.status = "FT";
+          commentary.unshift({
+            time: 90,
+            text: "Full Time! The referee blows the final whistle to end the match."
+          });
+        }
+
+        m.stats = JSON.stringify(stats);
+        m.events = JSON.stringify(events);
+        m.commentary = JSON.stringify(commentary);
+      }
+      
+      // Auto-start scheduled matches whose start time has arrived
+      if (m.status === "SCHEDULED" && m.datetime && new Date(m.datetime).getTime() <= Date.now()) {
+        m.status = "LIVE";
+        m.timeElapsed = 0;
+        m.teamAScore = 0;
+        m.teamBScore = 0;
+        m.events = JSON.stringify([]);
+        m.commentary = JSON.stringify([
+          { time: 0, text: `Kickoff! The match has officially begun at ${m.venue}.` }
+        ]);
+        m.stats = JSON.stringify({
+          possession: { teamA: 50, teamB: 50 },
+          shots: { teamA: 0, teamB: 0 },
+          shotsOnTarget: { teamA: 0, teamB: 0 },
+          fouls: { teamA: 0, teamB: 0 },
+          yellowCards: { teamA: 0, teamB: 0 },
+          redCards: { teamA: 0, teamB: 0 },
+          corners: { teamA: 0, teamB: 0 }
+        });
+      }
+    });
+  }, 10000); // ticks every 10 seconds (1 simulated minute per tick)
 }
 
 // Mock Query Functions mimicking Prisma Client queries
@@ -978,6 +983,9 @@ export const dbMock = {
     }
   }
 };
+
+// Trigger simulation background ticking immediately on startup
+simulateLiveMatches();
 
 // Export active db: either Prisma Client or Mock Database
 export const db = prisma ? (prisma as any) : dbMock;
