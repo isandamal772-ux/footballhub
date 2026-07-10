@@ -29,29 +29,45 @@ export default function MatchCenter() {
   const prevScoreRef = useRef<{ a: number; b: number } | null>(null);
   const [chatNickname, setChatNickname] = useState('');
   const [chatText, setChatText] = useState('');
-  const [chatMessages, setChatMessages] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (match?.id) {
-      setChatMessages([
-        { user: "Diego_99", flag: "🇦🇷", text: `Vamos! Best of luck to the boys today!`, time: "10 mins ago" },
-        { user: "KylianFanClub", flag: "🇫🇷", text: "Allez Les Bleus! Easy win coming up.", time: "7 mins ago" },
-        { user: "TacticalGamer", flag: "🇬🇧", text: "Exciting tactical setup. Hoping for a high scoring game!", time: "2 mins ago" }
-      ]);
+  
+  // Parse comments from match object
+  const chatMessages = (() => {
+    if (match?.comments) {
+      try {
+        return JSON.parse(match.comments);
+      } catch (e) {}
     }
-  }, [match?.id]);
+    return [
+      { user: "Diego_99", flag: "🇦🇷", text: "Vamos! Best of luck to the boys today!", time: "10 mins ago" },
+      { user: "KylianFanClub", flag: "🇫🇷", text: "Allez Les Bleus! Easy win coming up.", time: "7 mins ago" }
+    ];
+  })();
 
-  const handlePostChat = (e: React.FormEvent) => {
+  const handlePostChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatNickname.trim() || !chatText.trim()) return;
-    const newMessage = {
-      user: chatNickname.trim(),
-      flag: "💬",
-      text: chatText.trim(),
-      time: "Just now"
-    };
-    setChatMessages(prev => [...prev, newMessage]);
-    setChatText('');
+    
+    const originalNickname = chatNickname;
+    const originalText = chatText;
+    setChatText(''); // clear input early for snappy UI
+
+    try {
+      const res = await fetch(`/api/matches/${id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nickname: originalNickname, text: originalText })
+      });
+      const data = await res.json();
+      if (data.success && data.comments) {
+        setMatch((prev: any) => ({
+          ...prev,
+          comments: JSON.stringify(data.comments)
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+      setChatText(originalText);
+    }
   };
 
   const playGoalAlertSound = () => {
@@ -1428,7 +1444,7 @@ export default function MatchCenter() {
 
               {/* Chat Message balloon stream */}
               <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
-                {chatMessages.map((msg, idx) => (
+                {chatMessages.map((msg: any, idx: number) => (
                   <div key={idx} className="flex flex-col gap-1 text-xs">
                     <div className="flex items-center gap-1.5">
                       <span className="text-slate-450">{msg.flag}</span>
