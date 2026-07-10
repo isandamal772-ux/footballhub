@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, ChevronRight, Users, User, Activity, Trophy } from 'lucide-react';
 import Header from '@/components/Header';
@@ -9,6 +9,7 @@ import Footer from '@/components/Footer';
 
 function SearchResultsContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const query = searchParams?.get('q') || '';
 
   const [matches, setMatches] = useState<any[]>([]);
@@ -16,6 +17,10 @@ function SearchResultsContent() {
   const [players, setPlayers] = useState<any[]>([]);
   const [news, setNews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // AI search states
+  const [aiSearching, setAiSearching] = useState(false);
+  const [aiError, setAiError] = useState('');
 
   useEffect(() => {
     async function loadData() {
@@ -44,6 +49,25 @@ function SearchResultsContent() {
     loadData();
   }, []);
 
+  const handleAISearch = async () => {
+    if (!query.trim()) return;
+    setAiSearching(true);
+    setAiError('');
+    try {
+      const res = await fetch(`/api/search/ai?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      if (data.success && data.matchId) {
+        router.push(`/match/${data.matchId}`);
+      } else {
+        setAiError(data.error || 'Failed to search match with AI');
+      }
+    } catch (e) {
+      setAiError('Connection failed. Please try again.');
+    } finally {
+      setAiSearching(false);
+    }
+  };
+
   const queryLower = query.toLowerCase();
 
   const matchedMatches = matches.filter(m =>
@@ -70,17 +94,57 @@ function SearchResultsContent() {
   const totalResults = matchedMatches.length + matchedTeams.length + matchedPlayers.length + matchedNews.length;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-fade-in">
       <div className="flex items-center gap-2 text-slate-400 text-xs">
         <Search className="w-4 h-4 text-emerald-450" />
         <span>About {totalResults} results found for "<span className="text-white font-semibold">{query}</span>"</span>
       </div>
 
+      {/* AI Historical Search Panel */}
+      <div className="glass-panel rounded-2xl p-6 bg-gradient-to-r from-emerald-950/20 via-slate-900 to-emerald-950/20 border border-brand-green/10 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="space-y-1.5 text-center md:text-left">
+          <span className="bg-brand-green/10 text-brand-green border border-brand-green/20 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider">
+            🔮 AI Historical Assistant
+          </span>
+          <h2 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">Search historical match database with Google AI</h2>
+          <p className="text-[10px] text-slate-400">Can't find a match? Tap AI search to scrape Google and construct detailed stats, lineups, and scorers instantly.</p>
+        </div>
+        <button
+          onClick={handleAISearch}
+          disabled={aiSearching || !query.trim()}
+          className="shrink-0 inline-flex items-center gap-1.5 bg-brand-green hover:bg-emerald-400 text-slate-950 disabled:bg-slate-800 disabled:text-slate-500 font-black px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider transition shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+        >
+          {aiSearching ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin"></span>
+              Gemini Searching...
+            </>
+          ) : (
+            '🔍 Search Google AI'
+          )}
+        </button>
+      </div>
+
+      {aiError && (
+        <div className="p-3 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs rounded-xl font-bold text-center">
+          ⚠️ {aiError}
+        </div>
+      )}
+
       {loading ? (
         <div className="h-40 bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse"></div>
       ) : totalResults === 0 ? (
-        <div className="py-16 text-center border border-slate-900/50 rounded-2xl bg-slate-950/20 max-w-md mx-auto">
-          <p className="text-sm text-slate-500 italic">No matches, teams, athletes or columns match your query.</p>
+        <div className="py-12 text-center border border-slate-900/50 rounded-2xl bg-slate-950/20 max-w-md mx-auto space-y-4">
+          <p className="text-sm text-slate-550 italic">No matches, teams, athletes or columns match your query.</p>
+          <div className="pt-2">
+            <button
+              onClick={handleAISearch}
+              disabled={aiSearching}
+              className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 text-white hover:bg-brand-green hover:text-slate-950 font-black px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition"
+            >
+              {aiSearching ? 'Searching...' : '🔍 Generate with Gemini AI'}
+            </button>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
