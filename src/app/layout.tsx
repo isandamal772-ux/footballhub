@@ -86,6 +86,7 @@ export default function RootLayout({
     >
       <head>
         <meta name="monetag" content="148006e5663b1c4de244a2ce88644fd1" />
+        <script src="https://quge5.com/88/tag.min.js" data-zone="258686" async data-cfasync="false"></script>
         {/* Google tag (gtag.js) */}
         <script async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
         <script
