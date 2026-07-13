@@ -1,0 +1,38 @@
+[
+  {
+    "id": "news-1",
+    "title": "Lionel Messi Declares World Cup Ambitions Alive After Thrilling Opener",
+    "slug": "messi-world-cup-ambitions-alive",
+    "summary": "Following Argentina's 2-2 battle with France, captain Lionel Messi discusses the team's tournament goals and performance.",
+    "content": "Argentina captain Lionel Messi stated that the team remains focused and confident after their high-stakes opening draw against France. 'We knew it would be a tough battle. France is a great team, but we showed our character and what we can achieve,' Messi said post-match. The match featured outstanding efforts from both squads, setting up an intense battle for Group A supremacy.",
+    "imageUrl": "https://images.unsplash.com/photo-1628779238951-be2c9f2a59f4?q=80&w=800&auto=format&fit=crop",
+    "trending": true,
+    "tags": "Argentina,Lionel Messi,World Cup",
+    "createdAt": "2026-07-04T12:00:00.000Z",
+    "updatedAt": "2026-07-04T12:00:00.000Z"
+  },
+  {
+    "id": "news-2",
+    "title": "Lamine Yamal Sets New Record as Spain's Youngest World Cup Goalscorer",
+    "slug": "lamine-yamal-record-spain-goalscorer",
+    "summary": "Barcelona's teenage sensation Lamine Yamal made history with a stunning goal in Spain's 3-1 victory over Germany.",
+    "content": "Lamine Yamal has written his name in the history books yet again. Scoring Spain's opening goal in a 3-1 victory over Germany, the 18-year-old winger became the youngest player to score for Spain in a FIFA World Cup. His performance has drawn praise from pundits worldwide, highlighting Spain's deep talent pool.",
+    "imageUrl": "https://images.unsplash.com/photo-1614632537423-1e6c2e7e0aab?q=80&w=800&auto=format&fit=crop",
+    "trending": true,
+    "tags": "Spain,Lamine Yamal,Records",
+    "createdAt": "2026-07-04T08:00:00.000Z",
+    "updatedAt": "2026-07-04T08:00:00.000Z"
+  },
+  {
+    "id": "news-3",
+    "title": "Didier Deschamps Praises Mbappé's Resilient Double Against Argentina",
+    "slug": "deschamps-praises-mbappe-resilience",
+    "summary": "France coach Didier Deschamps applauded Kylian Mbappé's late rescue act in their opening World Cup group match.",
+    "content": "Didier Deschamps was full of praise for superstar Kylian Mbappé after his brace saved a point for France. 'Kylian has that unique ability to change a match in a split second. Even when we were down 2-0, he kept pushing the team forward,' Deschamps remarked during his post-match conference.",
+    "imageUrl": "https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=800&auto=format&fit=crop",
+    "trending": false,
+    "tags": "France,Kylian Mbappe,Didier Deschamps",
+    "createdAt": "2026-07-04T00:00:00.000Z",
+    "updatedAt": "2026-07-04T00:00:00.000Z"
+  }
+]
