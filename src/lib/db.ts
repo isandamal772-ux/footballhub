@@ -614,6 +614,30 @@ function simulateLiveMatches() {
             time: 90,
             text: "Full Time! The referee blows the final whistle to end the match."
           });
+
+          // Auto-generate news article for this newly completed match
+          const tA = mockStore.teams.find(t => t.id === m.teamAId);
+          const tB = mockStore.teams.find(t => t.id === m.teamBId);
+          if (tA && tB) {
+            const articleTitle = `${tA.name} ${m.teamAScore} - ${m.teamBScore} ${tB.name}: Official Match Recap & Final Highlights`;
+            const slug = articleTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+            
+            // Avoid duplicate articles
+            if (!mockStore.news.some(n => n.slug === slug)) {
+              mockStore.news.unshift({
+                id: `news-match-${m.id}`,
+                title: articleTitle,
+                slug,
+                summary: `Complete post-match report and key highlights as ${tA.name} faced ${tB.name} in an intense encounter ending ${m.teamAScore}-${m.teamBScore}.`,
+                content: `An exciting match concluded today at ${m.venue} as ${tA.name} clashed with ${tB.name} in a high-stakes ${m.stage} encounter. The match ended with a final score of ${m.teamAScore}-${m.teamBScore}.\n\nBoth teams showcased great tactical discipline and offensive determination throughout the 90 minutes. Review full statistics, lineups, and live commentary on World Football Hub.`,
+                imageUrl: tA.flagUrl || "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
+                trending: true,
+                tags: `${tA.name},${tB.name},Match Report,Highlights`,
+                createdAt: new Date(),
+                updatedAt: new Date()
+              });
+            }
+          }
         }
 
         m.stats = JSON.stringify(stats);
