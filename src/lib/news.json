@@ -1,5 +1,41 @@
 [
   {
+    "id": "news-auto-1784539524407-0",
+    "title": "Kylian Mbappé Shines in Training Ahead of Champions League Opener (7/20/2026)",
+    "slug": "kylian-mbapp-shines-in-training-ahead-of-champions-league-opener-4420",
+    "summary": "The French superstar looked sharp in training as Real Madrid prepares to begin their European title defense.",
+    "content": "Kylian Mbappé displayed exceptional form during Real Madrid's final training session today. Manager Carlo Ancelotti praised his adaptation to the squad, stating that Mbappé is fully fit and ready to lead the attack. Fans are highly anticipating his Champions League debut in the iconic white jersey.",
+    "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
+    "trending": true,
+    "tags": "Champions League,Mbappe,Real Madrid",
+    "createdAt": "2026-07-20T09:25:24.420Z",
+    "updatedAt": "2026-07-20T09:25:24.420Z"
+  },
+  {
+    "id": "news-auto-1784539524420-1",
+    "title": "Erling Haaland Scores Back-to-Back Hat-tricks in League Matches (7/20/2026)",
+    "slug": "erling-haaland-scores-back-to-back-hat-tricks-in-league-matches-4420",
+    "summary": "Manchester City's goal-scoring machine continues to break goal records in the opening weeks of the season.",
+    "content": "Erling Haaland secured another spectacular hat-trick today, guiding Manchester City to a comfortable 4-1 victory. His positioning, pace, and clinical finishes have left defenders struggling to cope. Pep Guardiola remarked that Haaland is looking even more dangerous than last season.",
+    "imageUrl": "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800&auto=format&fit=crop",
+    "trending": true,
+    "tags": "Premier League,Haaland,Manchester City",
+    "createdAt": "2026-07-20T09:25:24.420Z",
+    "updatedAt": "2026-07-20T09:25:24.420Z"
+  },
+  {
+    "id": "news-auto-1784539524420-2",
+    "title": "Lionel Messi Returns to Action with Magnificent Free-kick Winner (7/20/2026)",
+    "slug": "lionel-messi-returns-to-action-with-magnificent-free-kick-winner-4420",
+    "summary": "The Inter Miami captain made a stunning return from injury, scoring a last-minute free-kick to secure three points.",
+    "content": "Lionel Messi marked his return to the pitch with a classic last-minute display of genius. Curling a free-kick into the top corner in the 93rd minute, he secured a vital win for his team. The stadium erupted in celebration, proving yet again his match-winning capabilities.",
+    "imageUrl": "https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=800&auto=format&fit=crop",
+    "trending": true,
+    "tags": "MLS,Lionel Messi,Inter Miami",
+    "createdAt": "2026-07-20T09:25:24.420Z",
+    "updatedAt": "2026-07-20T09:25:24.420Z"
+  },
+  {
     "id": "news-auto-1784449611447-0",
     "title": "Kylian Mbappé Shines in Training Ahead of Champions League Opener (7/19/2026)",
     "slug": "kylian-mbapp-shines-in-training-ahead-of-champions-league-opener-1460",
@@ -142,41 +178,5 @@
     "tags": "MLS,Lionel Messi,Inter Miami",
     "createdAt": "2026-07-16T08:22:56.645Z",
     "updatedAt": "2026-07-16T08:22:56.645Z"
-  },
-  {
-    "id": "news-auto-1784103811354-0",
-    "title": "Kylian Mbappé Shines in Training Ahead of Champions League Opener (7/15/2026)",
-    "slug": "kylian-mbapp-shines-in-training-ahead-of-champions-league-opener-1365",
-    "summary": "The French superstar looked sharp in training as Real Madrid prepares to begin their European title defense.",
-    "content": "Kylian Mbappé displayed exceptional form during Real Madrid's final training session today. Manager Carlo Ancelotti praised his adaptation to the squad, stating that Mbappé is fully fit and ready to lead the attack. Fans are highly anticipating his Champions League debut in the iconic white jersey.",
-    "imageUrl": "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=800&auto=format&fit=crop",
-    "trending": true,
-    "tags": "Champions League,Mbappe,Real Madrid",
-    "createdAt": "2026-07-15T08:23:31.366Z",
-    "updatedAt": "2026-07-15T08:23:31.366Z"
-  },
-  {
-    "id": "news-auto-1784103811366-1",
-    "title": "Erling Haaland Scores Back-to-Back Hat-tricks in League Matches (7/15/2026)",
-    "slug": "erling-haaland-scores-back-to-back-hat-tricks-in-league-matches-1366",
-    "summary": "Manchester City's goal-scoring machine continues to break goal records in the opening weeks of the season.",
-    "content": "Erling Haaland secured another spectacular hat-trick today, guiding Manchester City to a comfortable 4-1 victory. His positioning, pace, and clinical finishes have left defenders struggling to cope. Pep Guardiola remarked that Haaland is looking even more dangerous than last season.",
-    "imageUrl": "https://images.unsplash.com/photo-1546519638-68e109498ffc?q=80&w=800&auto=format&fit=crop",
-    "trending": true,
-    "tags": "Premier League,Haaland,Manchester City",
-    "createdAt": "2026-07-15T08:23:31.366Z",
-    "updatedAt": "2026-07-15T08:23:31.366Z"
-  },
-  {
-    "id": "news-auto-1784103811366-2",
-    "title": "Lionel Messi Returns to Action with Magnificent Free-kick Winner (7/15/2026)",
-    "slug": "lionel-messi-returns-to-action-with-magnificent-free-kick-winner-1366",
-    "summary": "The Inter Miami captain made a stunning return from injury, scoring a last-minute free-kick to secure three points.",
-    "content": "Lionel Messi marked his return to the pitch with a classic last-minute display of genius. Curling a free-kick into the top corner in the 93rd minute, he secured a vital win for his team. The stadium erupted in celebration, proving yet again his match-winning capabilities.",
-    "imageUrl": "https://images.unsplash.com/photo-1518063319789-7217e6706b04?q=80&w=800&auto=format&fit=crop",
-    "trending": true,
-    "tags": "MLS,Lionel Messi,Inter Miami",
-    "createdAt": "2026-07-15T08:23:31.366Z",
-    "updatedAt": "2026-07-15T08:23:31.366Z"
   }
 ]
